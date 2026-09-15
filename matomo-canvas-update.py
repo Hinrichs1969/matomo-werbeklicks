@@ -12,7 +12,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import os
-TOKEN    = os.environ.get("MATOMO_TOKEN", "547633cd6576f4f6b8030cba226da95c")
+TOKEN    = os.environ.get("MATOMO_TOKEN", "")
 SITE_ID  = 14
 BASE_URL = "https://matomo.mundschenk.de/index.php"
 START    = "2026-07-01"
