@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OKR Werbemarkt — DB vs. 40.000 €</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a2421; --muted: #5c6b66; --paper: #f3efe6; --panel: rgba(255,252,246,.88);
+      --line: #d5cdc0; --accent: #0f6b5c; --warn: #9a5b12;
+      --vermittlung: #1f4b7a; --sonstige: #0f6b5c; --online: #b45309;
+      --open: #6b8fad; --lost: #b42318; --won: #147a69; --act: #5b4b8a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #d9ebe4 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #f0e2c8 0%, transparent 50%),
+        linear-gradient(180deg, #efe9dc 0%, var(--paper) 40%, #e7eee9 100%);
+    }
+    main { max-width: 1120px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+    header { display: grid; gap: .35rem; margin-bottom: 1.5rem; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; font-weight: 700; color: var(--accent); }
+    h1 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; }
+    .sub { margin: 0; color: var(--muted); max-width: 46rem; }
+    .hero { display: grid; grid-template-columns: 1.45fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 1.2rem 1.3rem; backdrop-filter: blur(8px); }
+    .goal-label { font-size: .9rem; color: var(--muted); margin-bottom: .35rem; }
+    .big-number { font-family: Fraunces, Georgia, serif; font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 700; }
+    .big-number span { color: var(--muted); font-size: .45em; font-weight: 500; }
+    .progress-track { margin-top: 1rem; height: 14px; border-radius: 999px; background: #e5ddd0; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #147a69, #1f9b84); border-radius: 999px; transition: width .6s ease; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; margin-top: .9rem; font-size: .95rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .stat h2 { margin: 0 0 .4rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .stat .value { font-family: Fraunces, Georgia, serif; font-size: 1.75rem; font-weight: 700; }
+    .stat .hint { margin-top: .35rem; color: var(--muted); font-size: .9rem; }
+    .dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
+    .dot.a { background: var(--vermittlung); } .dot.b { background: var(--sonstige); } .dot.c { background: var(--online); }
+    .dot.open { background: var(--open); } .dot.lost { background: var(--lost); } .dot.won { background: var(--won); } .dot.act { background: var(--act); }
+    .charts { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .charts-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    h3 { margin: 0 0 .85rem; font-family: Fraunces, Georgia, serif; font-size: 1.15rem; }
+    .bars { display: grid; gap: .42rem; min-height: 180px; }
+    .bar-row { display: grid; grid-template-columns: 2.6rem 1fr 4.2rem; gap: .55rem; align-items: center; font-size: .82rem; }
+    .stack { display: flex; height: 16px; border-radius: 6px; overflow: hidden; background: #ebe4d8; }
+    .stack > i { display: block; height: 100%; }
+    .stack .a { background: var(--vermittlung); } .stack .b { background: var(--sonstige); } .stack .c { background: var(--online); }
+    .stack .open { background: var(--open); } .stack .lost { background: var(--lost); } .stack .won { background: var(--won); }
+    .stack .act { background: var(--act); }
+    .stack .conv { background: var(--won); }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th, td { text-align: left; padding: .45rem 0; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    footer { margin-top: .5rem; color: var(--muted); font-size: .85rem; line-height: 1.45; }
+    .warn { margin-top: .75rem; padding: .7rem .85rem; border-radius: 10px; background: #fff4e5; color: var(--warn); font-size: .9rem; }
+    @media (max-width: 900px) {
+      .hero, .charts, .charts-3, .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Mundschenk · Werbemarkt OKR · Zyklus ab 2026-07-13</div>
+      <h1>Deckungsbeitrag ergänzende Produkte</h1>
+      <p class="sub">Abgleich zum Ziel von 40.000 € DB seit Zyklusstart. Enthält Sonstige [adpipe] und Online-Rubriken in Anzeigen [adpipe], plus Cross-Selling-Prozesskennzahlen.</p>
+    </header>
+
+    <section class="hero">
+      <div class="panel">
+        <div class="goal-label">Ist DB seit Zyklusstart</div>
+        <div class="big-number" id="totalDb">— <span>/ 40.000 €</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="meta-row">
+          <div><strong id="progressPct">—</strong> erreicht</div>
+          <div>noch <strong id="remaining">—</strong></div>
+          <div><strong id="dealCount">—</strong> gewonnene Deals</div>
+        </div>
+        <div class="warn" id="onlineWarn" hidden></div>
+      </div>
+      <div class="panel">
+        <div class="goal-label">Aktualisiert</div>
+        <div class="big-number" style="font-size:1.55rem" id="generatedAt">—</div>
+        <div class="meta-row" style="margin-top:1rem">
+          <div><span class="dot act"></span>CS-Aktivitäten: <strong id="actTotal">—</strong></div>
+          <div>Sonstige-Deals neu: <strong id="dealCreated">—</strong></div>
+          <div><span class="dot won"></span>Conv. Gewinn: <strong id="convWon">—</strong></div>
+          <div>Conv. Deal: <strong id="convDeal">—</strong></div>
+          <div>Abschlussquote: <strong id="winRate">—</strong></div>
+        </div>
+        <p class="sub" style="margin-top:.85rem" id="sourceNote"></p>
+      </div>
+    </section>
+
+    <section class="stat-grid">
+      <article class="panel stat">
+        <h2><span class="dot a"></span>Vermittlungen (×15%)</h2>
+        <div class="value" id="segA">—</div>
+        <div class="hint" id="segAHint"></div>
+      </article>
+      <article class="panel stat">
+        <h2><span class="dot b"></span>Sonstige Rest / Klickbare</h2>
+        <div class="value" id="segB">—</div>
+        <div class="hint" id="segBHint"></div>
+      </article>
+      <article class="panel stat">
+        <h2><span class="dot c"></span>Online über Rubriken</h2>
+        <div class="value" id="segC">—</div>
+        <div class="hint" id="segCHint"></div>
+      </article>
+    </section>
+
+    <section class="charts">
+      <div class="panel">
+        <h3>DB je Kalenderwoche (gewonnen)</h3>
+        <div class="bars" id="weeklyBars"></div>
+      </div>
+      <div class="panel">
+        <h3>Online nach Rubrik</h3>
+        <table>
+          <thead><tr><th>Rubrik</th><th class="num">Deals</th><th class="num">DB €</th></tr></thead>
+          <tbody id="onlineTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="charts-3">
+      <div class="panel">
+        <h3><span class="dot act"></span>Cross-Selling Aktivitäten / Woche</h3>
+        <div class="bars" id="actBars"></div>
+      </div>
+      <div class="panel">
+        <h3>Deals Sonstige [adpipe] / Woche</h3>
+        <div class="bars" id="dealBars"></div>
+        <div class="meta-row" style="margin-top:.8rem;font-size:.85rem">
+          <span><span class="dot open"></span>Offen</span>
+          <span><span class="dot lost"></span>Verloren</span>
+          <span><span class="dot won"></span>Gewonnen</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3><span class="dot won"></span>Conversion Gewinn / Woche</h3>
+        <div class="bars" id="convBars"></div>
+        <p class="sub" style="margin-top:.75rem;font-size:.82rem" id="convNote"></p>
+      </div>
+    </section>
+
+    <footer id="footerNote"></footer>
+  </main>
+  <script>
+    const DATA = {"generated_at": "2026-09-15T15:02:17", "cycle_start": "2026-07-13", "goal": 40000.0, "total_db": 4523.36, "progress_pct": 11.3, "remaining": 35476.64, "deal_count": 56, "segments": {"vermittlungen": {"n": 3, "db": 286.02, "value": 1906.8, "missing_db": 0}, "sonstige_rest": {"n": 46, "db": 3388.34, "value": 3434.0, "missing_db": 0}, "online_anzeigen": {"n": 7, "db": 849.0, "value": 849.0, "missing_db": 1}}, "online_by_rubrik": {"Rätselseite": {"n": 6, "db": 499.0}, "Standardbanner HK online": {"n": 1, "db": 350.0}}, "weekly_db": [{"week": "W29", "vermittlungen": 0.0, "sonstige_rest": 29.0, "online_anzeigen": 0.0, "total": 29.0}, {"week": "W31", "vermittlungen": 286.02, "sonstige_rest": 0.0, "online_anzeigen": 0.0, "total": 286.02}, {"week": "W32", "vermittlungen": 0.0, "sonstige_rest": 290.0, "online_anzeigen": 0.0, "total": 290.0}, {"week": "W33", "vermittlungen": 0.0, "sonstige_rest": 635.78, "online_anzeigen": 0.0, "total": 635.78}, {"week": "W34", "vermittlungen": 0.0, "sonstige_rest": 511.78, "online_anzeigen": 0.0, "total": 511.78}, {"week": "W35", "vermittlungen": 0.0, "sonstige_rest": 743.0, "online_anzeigen": 0.0, "total": 743.0}, {"week": "W36", "vermittlungen": 0.0, "sonstige_rest": 685.78, "online_anzeigen": 0.0, "total": 685.78}, {"week": "W37", "vermittlungen": 0.0, "sonstige_rest": 348.0, "online_anzeigen": 350.0, "total": 698.0}, {"week": "W38", "vermittlungen": 0.0, "sonstige_rest": 145.0, "online_anzeigen": 499.0, "total": 644.0}], "process": {"activities_total": 247, "deals_created_total": 190, "deals_by_status": {"open": 51, "won": 56, "lost": 83}, "conversion": {"to_deal_pct": 76.9, "to_won_pct": 22.7, "win_rate_pct": 40.3, "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."}, "weekly_activities": [{"week": "W29", "count": 2}, {"week": "W30", "count": 4}, {"week": "W31", "count": 0}, {"week": "W32", "count": 1}, {"week": "W33", "count": 32}, {"week": "W34", "count": 19}, {"week": "W35", "count": 66}, {"week": "W36", "count": 57}, {"week": "W37", "count": 59}, {"week": "W38", "count": 7}], "weekly_deals": [{"week": "W29", "open": 28, "won": 1, "lost": 25, "total": 54}, {"week": "W30", "open": 0, "won": 0, "lost": 0, "total": 0}, {"week": "W31", "open": 7, "won": 3, "lost": 0, "total": 10}, {"week": "W32", "open": 0, "won": 6, "lost": 2, "total": 8}, {"week": "W33", "open": 2, "won": 13, "lost": 5, "total": 20}, {"week": "W34", "open": 0, "won": 6, "lost": 0, "total": 6}, {"week": "W35", "open": 1, "won": 6, "lost": 10, "total": 17}, {"week": "W36", "open": 3, "won": 13, "lost": 17, "total": 33}, {"week": "W37", "open": 9, "won": 6, "lost": 21, "total": 36}, {"week": "W38", "open": 1, "won": 2, "lost": 3, "total": 6}], "weekly_conversion": [{"week": "W29", "activities": 2, "deals_created": 54, "won": 1, "to_deal_pct": 2700.0, "to_won_pct": 50.0}, {"week": "W30", "activities": 4, "deals_created": 0, "won": 0, "to_deal_pct": 0.0, "to_won_pct": 0.0}, {"week": "W31", "activities": 0, "deals_created": 10, "won": 3, "to_deal_pct": null, "to_won_pct": null}, {"week": "W32", "activities": 1, "deals_created": 8, "won": 6, "to_deal_pct": 800.0, "to_won_pct": 600.0}, {"week": "W33", "activities": 32, "deals_created": 20, "won": 13, "to_deal_pct": 62.5, "to_won_pct": 40.6}, {"week": "W34", "activities": 19, "deals_created": 6, "won": 6, "to_deal_pct": 31.6, "to_won_pct": 31.6}, {"week": "W35", "activities": 66, "deals_created": 17, "won": 6, "to_deal_pct": 25.8, "to_won_pct": 9.1}, {"week": "W36", "activities": 57, "deals_created": 33, "won": 13, "to_deal_pct": 57.9, "to_won_pct": 22.8}, {"week": "W37", "activities": 59, "deals_created": 36, "won": 6, "to_deal_pct": 61.0, "to_won_pct": 10.2}, {"week": "W38", "activities": 7, "deals_created": 6, "won": 2, "to_deal_pct": 85.7, "to_won_pct": 28.6}]}, "backfill": {"updated": 0, "already_ok": 0, "errors": [], "error_count": 0, "skipped": true}, "sources": {"filter_id": 38534, "filter_name": "OKR DB Gesamt — vs. 40.000 (ab 13.07.2026)", "note": "Nur Deals mit Gewinn-Datum ab 2026-07-13. Spezialisten ausgeschlossen. Prozess: Cross-Selling-Aktivitäten + Deals in Sonstige [adpipe]."}};
+    const euro = (n) => new Intl.NumberFormat('de-DE', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(n||0);
+    const euroExact = (n) => new Intl.NumberFormat('de-DE', { style:'currency', currency:'EUR', maximumFractionDigits:2 }).format(n||0);
+    const pctLabel = (n) => (n == null ? '—' : `${n.toLocaleString('de-DE')} %`);
+
+    document.getElementById('totalDb').innerHTML = `${euro(DATA.total_db)} <span>/ ${euro(DATA.goal)}</span>`;
+    document.getElementById('progressPct').textContent = `${DATA.progress_pct} %`;
+    document.getElementById('remaining').textContent = euro(DATA.remaining);
+    document.getElementById('dealCount').textContent = DATA.deal_count;
+    document.getElementById('progressFill').style.width = Math.min(DATA.progress_pct, 100) + '%';
+    document.getElementById('generatedAt').textContent = new Date(DATA.generated_at).toLocaleString('de-DE');
+    document.getElementById('sourceNote').textContent = DATA.sources.note;
+    document.getElementById('actTotal').textContent = DATA.process.activities_total;
+    document.getElementById('dealCreated').textContent = DATA.process.deals_created_total;
+    const conv = DATA.process.conversion || {};
+    document.getElementById('convWon').textContent = pctLabel(conv.to_won_pct);
+    document.getElementById('convDeal').textContent = pctLabel(conv.to_deal_pct);
+    document.getElementById('winRate').textContent = pctLabel(conv.win_rate_pct);
+    document.getElementById('convNote').textContent = conv.definition || '';
+
+    const a = DATA.segments.vermittlungen, b = DATA.segments.sonstige_rest, c = DATA.segments.online_anzeigen;
+    document.getElementById('segA').textContent = euroExact(a.db);
+    document.getElementById('segB').textContent = euroExact(b.db);
+    document.getElementById('segC').textContent = euroExact(c.db);
+    document.getElementById('segAHint').textContent = `${a.n} Deals · OKR DB A`;
+    document.getElementById('segBHint').textContent = `${b.n} Deals · CrossSelling Sonstige`;
+    document.getElementById('segCHint').textContent = `${c.n} Deals · Anzeigen [adpipe]`;
+    if (c.missing_db > 0) {
+      const el = document.getElementById('onlineWarn');
+      el.hidden = false;
+      el.textContent = `${c.missing_db} Online-Deals ohne DB berechnet — Deal value als DB (Satz 1) verwendet.`;
+    }
+
+    function renderStack(rows, keys, maxKey, targetId) {
+      const max = Math.max(...rows.map(r => r[maxKey] || 0), 1);
+      document.getElementById(targetId).innerHTML = rows.map(r => {
+        const parts = keys.map(([cls, key]) => `<i class="${cls}" style="width:${(r[key]/max)*100}%"></i>`).join('');
+        return `<div class="bar-row"><div>${r.week}</div><div class="stack">${parts}</div><div style="text-align:right">${r[maxKey]}</div></div>`;
+      }).join('');
+    }
+
+    const weeksDb = DATA.weekly_db.slice(-16);
+    const maxDb = Math.max(...weeksDb.map(w => w.total), 1);
+    document.getElementById('weeklyBars').innerHTML = weeksDb.map(w => {
+      return `<div class="bar-row"><div>${w.week}</div><div class="stack">
+        <i class="a" style="width:${(w.vermittlungen/maxDb)*100}%"></i>
+        <i class="b" style="width:${(w.sonstige_rest/maxDb)*100}%"></i>
+        <i class="c" style="width:${(w.online_anzeigen/maxDb)*100}%"></i>
+      </div><div style="text-align:right">${euro(w.total)}</div></div>`;
+    }).join('');
+
+    const rows = Object.entries(DATA.online_by_rubrik);
+    document.getElementById('onlineTable').innerHTML = rows.length
+      ? rows.map(([name, row]) => `<tr><td>${name}</td><td class="num">${row.n}</td><td class="num">${euroExact(row.db)}</td></tr>`).join('')
+      : `<tr><td colspan="3">Keine Online-Rubrik-Deals im Zyklus</td></tr>`;
+
+    const actRows = DATA.process.weekly_activities.slice(-16).map(r => ({...r, total: r.count}));
+    renderStack(actRows, [['act','count']], 'total', 'actBars');
+    const dealRows = DATA.process.weekly_deals.slice(-16);
+    const maxDeals = Math.max(...dealRows.map(r => r.total), 1);
+    document.getElementById('dealBars').innerHTML = dealRows.map(r => `<div class="bar-row"><div>${r.week}</div><div class="stack">
+      <i class="open" style="width:${(r.open/maxDeals)*100}%"></i>
+      <i class="lost" style="width:${(r.lost/maxDeals)*100}%"></i>
+      <i class="won" style="width:${(r.won/maxDeals)*100}%"></i>
+    </div><div style="text-align:right">${r.total}</div></div>`).join('');
+
+    const convRows = (DATA.process.weekly_conversion || []).slice(-16);
+    const maxConv = Math.max(...convRows.map(r => r.to_won_pct || 0), 1);
+    document.getElementById('convBars').innerHTML = convRows.map(r => {
+      const val = r.to_won_pct;
+      const width = val == null ? 0 : (val / maxConv) * 100;
+      const label = val == null ? '—' : pctLabel(val);
+      return `<div class="bar-row"><div>${r.week}</div><div class="stack"><i class="conv" style="width:${width}%"></i></div><div style="text-align:right">${label}</div></div>`;
+    }).join('');
+
+    document.getElementById('footerNote').textContent =
+      `Zyklus ab ${DATA.cycle_start} · Filter ${DATA.sources.filter_name} (ID ${DATA.sources.filter_id}) · DB-Satz-Backfill Online: ${DATA.backfill.updated} aktualisiert.`;
+  </script>
+</body>
+</html>

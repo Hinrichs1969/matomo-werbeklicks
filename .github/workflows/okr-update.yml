@@ -1,0 +1,37 @@
+name: OKR Dashboard Update
+
+on:
+  schedule:
+    # Täglich 08:05 Uhr (UTC+2 = 06:05 UTC) – 5 Min. nach Matomo-Update
+    - cron: "5 6 * * *"
+  workflow_dispatch:  # Manuell auslösbar über GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: OKR-Skript ausführen
+        env:
+          PIPEDRIVE_API_TOKEN: ${{ secrets.PIPEDRIVE_API_TOKEN }}
+          OKR_GOAL: "40000"
+          OKR_FILTER_ID: "38534"
+        run: python okr/refresh.py
+
+      - name: OKR-Dashboard committen und pushen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add okr/index.html okr/data.json
+          git diff --cached --quiet || git commit -m "OKR-Dashboard aktualisiert $(date +'%Y-%m-%d')"
+          git push
