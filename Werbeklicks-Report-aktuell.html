@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Paper Werbeklicks &ndash; Report 12.09.2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; padding: 32px 40px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 14px; font-weight: 600; margin: 24px 0 10px; }
+  .meta { color: #666; font-size: 11px; margin-bottom: 20px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: #f5f7fa; border: 1px solid #e4e7ec; border-radius: 8px; padding: 12px 14px; }
+  .kpi-label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi.blue .kpi-value { color: #2563eb; }
+  .kpi.green .kpi-value { color: #16a34a; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
+  thead th { background: #f5f7fa; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: #555; padding: 7px 10px; text-align: left; border-bottom: 2px solid #e4e7ec; }
+  thead th.right { text-align: right; } thead th.center { text-align: center; }
+  tbody tr:nth-child(odd) { background: #fafbfc; }
+  tbody td { padding: 7px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  tbody td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.center { text-align: center; }
+  tbody td.url { color: #666; font-size: 11px; }
+  .pill { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .pill-green { background: #dcfce7; color: #166534; }
+  .pill-orange { background: #fef3c7; color: #92400e; }
+  .bar-chart { margin-bottom: 6px; }
+  .bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .bar-label { width: 44px; font-size: 10px; color: #555; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; background: #e9ecef; border-radius: 2px; height: 12px; }
+  .bar-fill { height: 100%; border-radius: 2px; background: #3b82f6; }
+  .bar-fill.banner { background: #94a3b8; }
+  .bar-val { width: 32px; font-size: 10px; color: #444; flex-shrink: 0; }
+  .offen { margin-top: 4px; }
+  .offen-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; }
+  footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid #eee; font-size: 10px; color: #999; }
+  @media print { @page { margin: 12mm 14mm; size: A4; } body { padding: 0; } }
+</style>
+</head>
+<body>
+
+<h1>E-Paper Werbeklicks &ndash; Werbekundenauswertung</h1>
+<p class="meta">Quelle: Matomo &middot; matomo.mundschenk.de &middot; Prenly E-Paper (Site ID 14) &middot;
+Stand: 12.09.2026 &middot; Zeitraum: 01.07.2026&ndash;12.09.2026 &middot; Automatisch aktualisiert</p>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Einblendungen gesamt</div><div class="kpi-value">586,693</div></div>
+  <div class="kpi blue"><div class="kpi-label">Klicks Klickbare Anzeigen</div><div class="kpi-value">13,315</div></div>
+  <div class="kpi blue"><div class="kpi-label">Klicks Banner / Interstitial</div><div class="kpi-value">1,116</div></div>
+  <div class="kpi green"><div class="kpi-label">&Oslash; CTR</div><div class="kpi-value">2.3&nbsp;%</div></div>
+</div>
+
+<div class="grid2">
+  <div>
+    <h2>T&auml;gliche Klicks &ndash; Klickbare Anzeigen</h2>
+    <div class="bar-chart" id="chart-clicks"></div>
+  </div>
+  <div>
+    <h2>T&auml;gliche Klicks &ndash; Banner / Interstitial</h2>
+    <div class="bar-chart" id="chart-banner"></div>
+  </div>
+</div>
+
+<h2>Monatsvergleich</h2>
+<table>
+  <thead><tr>
+    <th>Monat</th>
+    <th class="right">Einblendungen</th>
+    <th class="right">Klicks Klickb. Anz.</th>
+    <th class="right">Banner-Klicks</th>
+    <th class="right">&Oslash; CTR</th>
+  </tr></thead>
+  <tbody>
+        <tr>
+          <td>Jul 2026</td>
+          <td class="right">220,192</td>
+          <td class="right">5,366</td>
+          <td class="right">460</td>
+          <td class="right">2.4&nbsp;%</td>
+        </tr>
+        <tr>
+          <td>Aug 2026</td>
+          <td class="right">265,374</td>
+          <td class="right">5,722</td>
+          <td class="right">363</td>
+          <td class="right">2.2&nbsp;%</td>
+        </tr>
+        <tr>
+          <td>Sep (1–12)</td>
+          <td class="right">101,127</td>
+          <td class="right">2,227</td>
+          <td class="right">293</td>
+          <td class="right">2.2&nbsp;%</td>
+        </tr></tbody>
+</table>
+
+<h2>Werbekunden &ndash; Klicks kumuliert (01.07.2026&ndash;12.09.2026)</h2>
+<table>
+  <thead><tr>
+    <th>Werbekunde</th><th>Ziel-URL</th>
+    <th class="right">Klicks</th><th class="right center">Anteil</th>
+    <th class="center">UTM</th><th class="center">Status</th>
+  </tr></thead>
+  <tbody>
+        <tr>
+          <td><strong>viavox.io</strong></td>
+          <td class="url">viavox.io</td>
+          <td class="right"><strong>6,150</strong></td>
+          <td class="center">46.2&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>vitamin-k4.de</strong></td>
+          <td class="url">vitamin-k4.de</td>
+          <td class="right"><strong>963</strong></td>
+          <td class="center">7.2&nbsp;%</td>
+          <td class="center"><span class="pill pill-orange">nein</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>smurfitkappa</strong></td>
+          <td class="url">smurfitkappa.concludis.de</td>
+          <td class="right"><strong>645</strong></td>
+          <td class="center">4.8&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>stadt_munster</strong></td>
+          <td class="url">bewerbung.munster.de</td>
+          <td class="right"><strong>312</strong></td>
+          <td class="center">2.3&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>wietzendorf.de</strong></td>
+          <td class="url">wietzendorf.de/amtsblatt</td>
+          <td class="right"><strong>242</strong></td>
+          <td class="center">1.8&nbsp;%</td>
+          <td class="center"><span class="pill pill-orange">nein</span></td>
+          <td class="center"><span class="pill pill-orange">klaeren</span></td>
+        </tr>
+        <tr>
+          <td><strong>hotel-park-soltau</strong></td>
+          <td class="url">hotel-park-soltau.de</td>
+          <td class="right"><strong>191</strong></td>
+          <td class="center">1.4&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>stadt-walsrode</strong></td>
+          <td class="url">jobs.stadt-walsrode.de</td>
+          <td class="right"><strong>170</strong></td>
+          <td class="center">1.3&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>Harbort GmbH & Co. KG</strong></td>
+          <td class="url">harbort.de/karriere</td>
+          <td class="right"><strong>162</strong></td>
+          <td class="center">1.2&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>bispinger-buergerliste</strong></td>
+          <td class="url">bispinger-buergerliste.de</td>
+          <td class="right"><strong>143</strong></td>
+          <td class="center">1.1&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>stadtwerke-munster-bispingen</strong></td>
+          <td class="url">ihr-stadtwerk.de</td>
+          <td class="right"><strong>122</strong></td>
+          <td class="center">0.9&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>niedersaechs.-landesforsten</strong></td>
+          <td class="url">landesforsten.de</td>
+          <td class="right"><strong>122</strong></td>
+          <td class="center">0.9&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>Bestattungen Hatesohl</strong></td>
+          <td class="url">bestattungen-hatesohl.de</td>
+          <td class="right"><strong>107</strong></td>
+          <td class="center">0.8&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>bundeswehr</strong></td>
+          <td class="url">bewerbung.bundeswehr-karriere.de</td>
+          <td class="right"><strong>59</strong></td>
+          <td class="center">0.4&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPD Schneverdingen</strong></td>
+          <td class="url">spd-heidekreis.de</td>
+          <td class="right"><strong>51</strong></td>
+          <td class="center">0.4&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sushi Bar Soltau</strong></td>
+          <td class="url">sushi-soltau.de</td>
+          <td class="right"><strong>51</strong></td>
+          <td class="center">0.4&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>Maderos</strong></td>
+          <td class="url">maderos.de</td>
+          <td class="right"><strong>43</strong></td>
+          <td class="center">0.3&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr>
+        <tr>
+          <td><strong>Grillhus</strong></td>
+          <td class="url">grillhus.de/jobs</td>
+          <td class="right"><strong>42</strong></td>
+          <td class="center">0.3&nbsp;%</td>
+          <td class="center"><span class="pill pill-green">ja</span></td>
+          <td class="center"><span class="pill pill-green">aktiv</span></td>
+        </tr></tbody>
+</table>
+
+<div class="grid2" style="margin-top:20px">
+  <div>
+    <h2>Offene Punkte</h2>
+    <div class="offen">
+      <div class="offen-item"><span class="pill pill-orange">offen</span> onclick-Code in Volksbank-Interstitial einbauen</div>
+      <div class="offen-item"><span class="pill pill-orange">offen</span> UTM ?utm_campaign=vitamin-k4 an Link erg&auml;nzen</div>
+      <div class="offen-item"><span class="pill pill-orange">offen</span> wietzendorf.de/amtsblatt intern kl&auml;ren</div>
+    </div>
+  </div>
+  <div>
+    <h2>Methodik</h2>
+    <p style="font-size:11px;color:#555;line-height:1.5">
+      Klicks = replica_box_link_click-Events, gefiltert per destination_url-Segment.
+      viavox.io: contains-Filter (alle URL-Varianten). Banner: banner_click-Event.
+      R&auml;tsel-Fabrik-Links herausgefiltert. CTR = Klicks &divide; Einblendungen.
+    </p>
+  </div>
+</div>
+
+<footer>
+  Matomo 5.11.2 &middot; https://matomo.mundschenk.de &middot; Site ID 14 &middot; Europe/Berlin &middot;
+  Automatisch generiert am 12.09.2026 um 08:00 Uhr
+</footer>
+
+<script>
+const DAILY_LABELS  = ["01.07", "02.07", "03.07", "04.07", "05.07", "06.07", "07.07", "08.07", "09.07", "10.07", "11.07", "12.07", "13.07", "14.07", "15.07", "16.07", "17.07", "18.07", "19.07", "20.07", "21.07", "22.07", "23.07", "24.07", "25.07", "26.07", "27.07", "28.07", "29.07", "30.07", "31.07", "01.08", "02.08", "03.08", "04.08", "05.08", "06.08", "07.08", "08.08", "09.08", "10.08", "11.08", "12.08", "13.08", "14.08", "15.08", "16.08", "17.08", "18.08", "19.08", "20.08", "21.08", "22.08", "23.08", "24.08", "25.08", "26.08", "27.08", "28.08", "29.08", "30.08", "31.08", "01.09", "02.09", "03.09", "04.09", "05.09", "06.09", "07.09", "08.09", "09.09", "10.09", "11.09", "12.09"];
+const DAILY_CLICKS  = [166, 164, 154, 243, 56, 251, 143, 165, 126, 129, 163, 77, 181, 189, 171, 194, 143, 168, 94, 230, 189, 217, 184, 198, 157, 131, 228, 207, 214, 214, 220, 124, 140, 180, 220, 202, 223, 199, 150, 109, 231, 209, 146, 205, 196, 184, 98, 237, 248, 246, 189, 191, 129, 136, 250, 199, 180, 207, 186, 157, 96, 255, 159, 209, 197, 225, 144, 138, 240, 254, 230, 212, 207, 12];
+const DAILY_BANNER  = [17, 12, 13, 22, 8, 19, 20, 20, 22, 15, 7, 4, 12, 8, 21, 11, 21, 21, 6, 16, 11, 12, 12, 17, 17, 3, 20, 19, 16, 7, 31, 9, 5, 7, 16, 8, 10, 27, 15, 10, 16, 19, 14, 10, 25, 9, 15, 17, 4, 17, 10, 8, 7, 5, 17, 7, 7, 3, 10, 3, 8, 25, 9, 6, 5, 11, 11, 8, 5, 9, 52, 98, 69, 10];
+
+function renderChart(id, labels, vals, cls) {
+  const max = Math.max(...vals) || 1;
+  const wrap = document.getElementById(id);
+  wrap.innerHTML = labels.map((l,i) => `
+    <div class="bar-row">
+      <div class="bar-label">${l}</div>
+      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${(vals[i]/max*100).toFixed(1)}%"></div></div>
+      <div class="bar-val">${vals[i]}</div>
+    </div>`).join('');
+}
+renderChart('chart-clicks', DAILY_LABELS, DAILY_CLICKS, '');
+renderChart('chart-banner', DAILY_LABELS, DAILY_BANNER, 'banner');
+</script>
+</body>
+</html>

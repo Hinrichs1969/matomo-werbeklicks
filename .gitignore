@@ -1,0 +1,13 @@
+# Logs
+*.log
+matomo-update.log
+
+# Canvas (nur lokal relevant)
+*.canvas.tsx
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
