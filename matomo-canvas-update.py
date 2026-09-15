@@ -16,9 +16,13 @@ TOKEN    = os.environ.get("MATOMO_TOKEN", "")
 SITE_ID  = 14
 BASE_URL = "https://matomo.mundschenk.de/index.php"
 START    = "2026-07-01"
-CANVAS   = "/Users/khinrichs/.cursor/projects/Users-khinrichs-KI-Projekt-OKR-7-26/canvases/matomo-werbekunden-klicks.canvas.tsx"
-HTML_OUT = "/Users/khinrichs/KI-Projekt/OKR 7:26/Werbeklicks-Report-aktuell.html"
-LOG      = "/Users/khinrichs/KI-Projekt/OKR 7:26/matomo-canvas-update.log"
+_HERE    = os.path.dirname(os.path.abspath(__file__))
+CANVAS   = os.environ.get(
+    "CANVAS_PATH",
+    "/Users/khinrichs/.cursor/projects/Users-khinrichs-KI-Projekt-OKR-7-26/canvases/matomo-werbekunden-klicks.canvas.tsx"
+)
+HTML_OUT = os.path.join(_HERE, "Werbeklicks-Report-aktuell.html")
+LOG      = os.path.join(_HERE, "matomo-canvas-update.log")
 
 TODAY    = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_DE = datetime.date.today().strftime("%d.%m.%Y")
@@ -500,9 +504,13 @@ def main():
 
         log("Generiere und schreibe Canvas...")
         canvas_code = generate_canvas(daily, monthly, adv_clicks)
-        with open(CANVAS, "w", encoding="utf-8") as f:
-            f.write(canvas_code)
-        log(f"Canvas gespeichert: {CANVAS}")
+        canvas_dir = os.path.dirname(CANVAS)
+        if canvas_dir and os.path.isdir(canvas_dir):
+            with open(CANVAS, "w", encoding="utf-8") as f:
+                f.write(canvas_code)
+            log(f"Canvas gespeichert: {CANVAS}")
+        else:
+            log("Canvas-Verzeichnis nicht vorhanden – Canvas-Ausgabe übersprungen.")
 
         log("Generiere HTML-Report...")
         html_code = generate_html(daily, monthly, adv_clicks)
