@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-16T06:24:24",
+  "generated_at": "2026-09-17T06:24:42",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 4523.36,
-  "progress_pct": 11.3,
-  "remaining": 35476.64,
-  "deal_count": 56,
+  "total_db": 5037.38,
+  "progress_pct": 12.6,
+  "remaining": 34962.62,
+  "deal_count": 61,
   "segments": {
     "vermittlungen": {
-      "n": 3,
-      "db": 286.02,
-      "value": 1906.8,
+      "n": 6,
+      "db": 572.04,
+      "value": 3813.6,
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 46,
-      "db": 3388.34,
-      "value": 3434.0,
+      "n": 47,
+      "db": 3417.34,
+      "value": 3463.0,
       "missing_db": 0
     },
     "online_anzeigen": {
-      "n": 7,
-      "db": 849.0,
-      "value": 849.0,
-      "missing_db": 1
+      "n": 8,
+      "db": 1048.0,
+      "value": 1048.0,
+      "missing_db": 2
     }
   },
   "online_by_rubrik": {
@@ -34,6 +34,10 @@
     "Standardbanner HK online": {
       "n": 1,
       "db": 350.0
+    },
+    "Premiumbanner HK online": {
+      "n": 1,
+      "db": 199.0
     }
   },
   "weekly_db": [
@@ -95,24 +99,24 @@
     },
     {
       "week": "W38",
-      "vermittlungen": 0.0,
-      "sonstige_rest": 145.0,
-      "online_anzeigen": 499.0,
-      "total": 644.0
+      "vermittlungen": 286.02,
+      "sonstige_rest": 174.0,
+      "online_anzeigen": 698.0,
+      "total": 1158.02
     }
   ],
   "process": {
-    "activities_total": 271,
-    "deals_created_total": 190,
+    "activities_total": 283,
+    "deals_created_total": 196,
     "deals_by_status": {
       "open": 51,
-      "won": 56,
-      "lost": 83
+      "won": 60,
+      "lost": 85
     },
     "conversion": {
-      "to_deal_pct": 70.1,
-      "to_won_pct": 20.7,
-      "win_rate_pct": 40.3,
+      "to_deal_pct": 69.3,
+      "to_won_pct": 21.2,
+      "win_rate_pct": 41.4,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -146,7 +150,7 @@
       },
       {
         "week": "W36",
-        "count": 57
+        "count": 58
       },
       {
         "week": "W37",
@@ -154,7 +158,7 @@
       },
       {
         "week": "W38",
-        "count": 31
+        "count": 42
       }
     ],
     "weekly_deals": [
@@ -224,9 +228,9 @@
       {
         "week": "W38",
         "open": 1,
-        "won": 2,
-        "lost": 3,
-        "total": 6
+        "won": 6,
+        "lost": 5,
+        "total": 12
       }
     ],
     "weekly_conversion": [
@@ -288,11 +292,11 @@
       },
       {
         "week": "W36",
-        "activities": 57,
+        "activities": 58,
         "deals_created": 33,
         "won": 13,
-        "to_deal_pct": 57.9,
-        "to_won_pct": 22.8
+        "to_deal_pct": 56.9,
+        "to_won_pct": 22.4
       },
       {
         "week": "W37",
@@ -304,11 +308,11 @@
       },
       {
         "week": "W38",
-        "activities": 31,
-        "deals_created": 6,
-        "won": 2,
-        "to_deal_pct": 19.4,
-        "to_won_pct": 6.5
+        "activities": 42,
+        "deals_created": 12,
+        "won": 6,
+        "to_deal_pct": 28.6,
+        "to_won_pct": 14.3
       }
     ]
   },
