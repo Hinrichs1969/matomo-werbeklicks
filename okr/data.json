@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-09-17T06:24:42",
+  "generated_at": "2026-09-18T06:24:00",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 5037.38,
-  "progress_pct": 12.6,
-  "remaining": 34962.62,
-  "deal_count": 61,
+  "total_db": 5137.85,
+  "progress_pct": 12.8,
+  "remaining": 34862.15,
+  "deal_count": 62,
   "segments": {
     "vermittlungen": {
-      "n": 6,
-      "db": 572.04,
-      "value": 3813.6,
+      "n": 7,
+      "db": 672.51,
+      "value": 4483.4,
       "missing_db": 0
     },
     "sonstige_rest": {
@@ -35,7 +35,7 @@
       "n": 1,
       "db": 350.0
     },
-    "Premiumbanner HK online": {
+    "Banner E-Paper-Startseite": {
       "n": 1,
       "db": 199.0
     }
@@ -99,24 +99,24 @@
     },
     {
       "week": "W38",
-      "vermittlungen": 286.02,
+      "vermittlungen": 386.49,
       "sonstige_rest": 174.0,
       "online_anzeigen": 698.0,
-      "total": 1158.02
+      "total": 1258.49
     }
   ],
   "process": {
-    "activities_total": 283,
-    "deals_created_total": 196,
+    "activities_total": 289,
+    "deals_created_total": 201,
     "deals_by_status": {
       "open": 51,
-      "won": 60,
-      "lost": 85
+      "won": 61,
+      "lost": 89
     },
     "conversion": {
-      "to_deal_pct": 69.3,
-      "to_won_pct": 21.2,
-      "win_rate_pct": 41.4,
+      "to_deal_pct": 69.6,
+      "to_won_pct": 21.1,
+      "win_rate_pct": 40.7,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -158,7 +158,7 @@
       },
       {
         "week": "W38",
-        "count": 42
+        "count": 48
       }
     ],
     "weekly_deals": [
@@ -228,9 +228,9 @@
       {
         "week": "W38",
         "open": 1,
-        "won": 6,
-        "lost": 5,
-        "total": 12
+        "won": 7,
+        "lost": 9,
+        "total": 17
       }
     ],
     "weekly_conversion": [
@@ -308,11 +308,11 @@
       },
       {
         "week": "W38",
-        "activities": 42,
-        "deals_created": 12,
-        "won": 6,
-        "to_deal_pct": 28.6,
-        "to_won_pct": 14.3
+        "activities": 48,
+        "deals_created": 17,
+        "won": 7,
+        "to_deal_pct": 35.4,
+        "to_won_pct": 14.6
       }
     ]
   },
