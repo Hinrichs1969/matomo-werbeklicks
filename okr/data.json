@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-21T06:25:53",
+  "generated_at": "2026-09-22T06:23:53",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 5137.85,
-  "progress_pct": 12.8,
-  "remaining": 34862.15,
-  "deal_count": 62,
+  "total_db": 5364.41,
+  "progress_pct": 13.4,
+  "remaining": 34635.59,
+  "deal_count": 67,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -14,16 +14,16 @@
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 47,
-      "db": 3417.34,
-      "value": 3463.0,
-      "missing_db": 0
+      "n": 53,
+      "db": 3842.9,
+      "value": 4205.0,
+      "missing_db": 2
     },
     "online_anzeigen": {
-      "n": 8,
-      "db": 1048.0,
-      "value": 1048.0,
-      "missing_db": 2
+      "n": 7,
+      "db": 849.0,
+      "value": 849.0,
+      "missing_db": 1
     }
   },
   "online_by_rubrik": {
@@ -34,10 +34,6 @@
     "Standardbanner HK online": {
       "n": 1,
       "db": 350.0
-    },
-    "Banner E-Paper-Startseite": {
-      "n": 1,
-      "db": 199.0
     }
   },
   "weekly_db": [
@@ -101,22 +97,29 @@
       "week": "W38",
       "vermittlungen": 386.49,
       "sonstige_rest": 174.0,
-      "online_anzeigen": 698.0,
-      "total": 1258.49
+      "online_anzeigen": 499.0,
+      "total": 1059.49
+    },
+    {
+      "week": "W39",
+      "vermittlungen": 0.0,
+      "sonstige_rest": 425.56,
+      "online_anzeigen": 0.0,
+      "total": 425.56
     }
   ],
   "process": {
-    "activities_total": 301,
-    "deals_created_total": 205,
+    "activities_total": 325,
+    "deals_created_total": 212,
     "deals_by_status": {
-      "open": 55,
-      "won": 61,
-      "lost": 89
+      "open": 49,
+      "won": 73,
+      "lost": 90
     },
     "conversion": {
-      "to_deal_pct": 68.1,
-      "to_won_pct": 20.3,
-      "win_rate_pct": 40.7,
+      "to_deal_pct": 65.2,
+      "to_won_pct": 22.5,
+      "win_rate_pct": 44.8,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -159,6 +162,10 @@
       {
         "week": "W38",
         "count": 60
+      },
+      {
+        "week": "W39",
+        "count": 24
       }
     ],
     "weekly_deals": [
@@ -220,17 +227,24 @@
       },
       {
         "week": "W37",
-        "open": 9,
+        "open": 8,
         "won": 6,
-        "lost": 21,
+        "lost": 22,
         "total": 36
       },
       {
         "week": "W38",
-        "open": 5,
-        "won": 7,
+        "open": 0,
+        "won": 13,
         "lost": 9,
-        "total": 21
+        "total": 22
+      },
+      {
+        "week": "W39",
+        "open": 0,
+        "won": 6,
+        "lost": 0,
+        "total": 6
       }
     ],
     "weekly_conversion": [
@@ -309,10 +323,18 @@
       {
         "week": "W38",
         "activities": 60,
-        "deals_created": 21,
-        "won": 7,
-        "to_deal_pct": 35.0,
-        "to_won_pct": 11.7
+        "deals_created": 22,
+        "won": 13,
+        "to_deal_pct": 36.7,
+        "to_won_pct": 21.7
+      },
+      {
+        "week": "W39",
+        "activities": 24,
+        "deals_created": 6,
+        "won": 6,
+        "to_deal_pct": 25.0,
+        "to_won_pct": 25.0
       }
     ]
   },
