@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-22T06:23:53",
+  "generated_at": "2026-09-23T06:24:18",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
   "total_db": 5364.41,
   "progress_pct": 13.4,
   "remaining": 34635.59,
-  "deal_count": 67,
+  "deal_count": 71,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -20,7 +20,7 @@
       "missing_db": 2
     },
     "online_anzeigen": {
-      "n": 7,
+      "n": 11,
       "db": 849.0,
       "value": 849.0,
       "missing_db": 1
@@ -28,7 +28,7 @@
   },
   "online_by_rubrik": {
     "Rätselseite": {
-      "n": 6,
+      "n": 10,
       "db": 499.0
     },
     "Standardbanner HK online": {
@@ -109,7 +109,7 @@
     }
   ],
   "process": {
-    "activities_total": 325,
+    "activities_total": 327,
     "deals_created_total": 212,
     "deals_by_status": {
       "open": 49,
@@ -117,8 +117,8 @@
       "lost": 90
     },
     "conversion": {
-      "to_deal_pct": 65.2,
-      "to_won_pct": 22.5,
+      "to_deal_pct": 64.8,
+      "to_won_pct": 22.3,
       "win_rate_pct": 44.8,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
@@ -165,7 +165,7 @@
       },
       {
         "week": "W39",
-        "count": 24
+        "count": 26
       }
     ],
     "weekly_deals": [
@@ -330,11 +330,11 @@
       },
       {
         "week": "W39",
-        "activities": 24,
+        "activities": 26,
         "deals_created": 6,
         "won": 6,
-        "to_deal_pct": 25.0,
-        "to_won_pct": 25.0
+        "to_deal_pct": 23.1,
+        "to_won_pct": 23.1
       }
     ]
   },
