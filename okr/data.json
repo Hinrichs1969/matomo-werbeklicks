@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T06:24:27",
+  "generated_at": "2026-09-25T06:23:42",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
   "total_db": 5364.41,
@@ -109,16 +109,16 @@
     }
   ],
   "process": {
-    "activities_total": 343,
-    "deals_created_total": 212,
+    "activities_total": 406,
+    "deals_created_total": 261,
     "deals_by_status": {
-      "open": 49,
+      "open": 98,
       "won": 73,
       "lost": 90
     },
     "conversion": {
-      "to_deal_pct": 61.8,
-      "to_won_pct": 21.3,
+      "to_deal_pct": 64.3,
+      "to_won_pct": 18.0,
       "win_rate_pct": 44.8,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
@@ -165,7 +165,7 @@
       },
       {
         "week": "W39",
-        "count": 42
+        "count": 105
       }
     ],
     "weekly_deals": [
@@ -241,10 +241,10 @@
       },
       {
         "week": "W39",
-        "open": 0,
+        "open": 49,
         "won": 6,
         "lost": 0,
-        "total": 6
+        "total": 55
       }
     ],
     "weekly_conversion": [
@@ -330,11 +330,11 @@
       },
       {
         "week": "W39",
-        "activities": 42,
-        "deals_created": 6,
+        "activities": 105,
+        "deals_created": 55,
         "won": 6,
-        "to_deal_pct": 14.3,
-        "to_won_pct": 14.3
+        "to_deal_pct": 52.4,
+        "to_won_pct": 5.7
       }
     ]
   },
