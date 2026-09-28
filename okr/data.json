@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-27T06:23:50",
+  "generated_at": "2026-09-28T06:27:21",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 5364.41,
-  "progress_pct": 13.4,
-  "remaining": 34635.59,
+  "total_db": 5563.41,
+  "progress_pct": 13.9,
+  "remaining": 34436.59,
   "deal_count": 71,
   "segments": {
     "vermittlungen": {
@@ -15,9 +15,9 @@
     },
     "sonstige_rest": {
       "n": 53,
-      "db": 3842.9,
+      "db": 4041.9,
       "value": 4205.0,
-      "missing_db": 2
+      "missing_db": 1
     },
     "online_anzeigen": {
       "n": 11,
@@ -96,9 +96,9 @@
     {
       "week": "W38",
       "vermittlungen": 386.49,
-      "sonstige_rest": 174.0,
+      "sonstige_rest": 373.0,
       "online_anzeigen": 499.0,
-      "total": 1059.49
+      "total": 1258.49
     },
     {
       "week": "W39",
