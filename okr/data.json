@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T06:25:05",
+  "generated_at": "2026-10-03T06:27:11",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
   "total_db": 5466.41,
@@ -116,17 +116,17 @@
     }
   ],
   "process": {
-    "activities_total": 481,
-    "deals_created_total": 326,
+    "activities_total": 491,
+    "deals_created_total": 329,
     "deals_by_status": {
-      "open": 136,
+      "open": 125,
       "won": 79,
-      "lost": 111
+      "lost": 125
     },
     "conversion": {
-      "to_deal_pct": 67.8,
-      "to_won_pct": 16.4,
-      "win_rate_pct": 41.6,
+      "to_deal_pct": 67.0,
+      "to_won_pct": 16.1,
+      "win_rate_pct": 38.7,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -172,11 +172,11 @@
       },
       {
         "week": "W39",
-        "count": 102
+        "count": 94
       },
       {
         "week": "W40",
-        "count": 78
+        "count": 96
       }
     ],
     "weekly_deals": [
@@ -196,9 +196,9 @@
       },
       {
         "week": "W31",
-        "open": 7,
+        "open": 6,
         "won": 3,
-        "lost": 0,
+        "lost": 1,
         "total": 10
       },
       {
@@ -252,17 +252,17 @@
       },
       {
         "week": "W39",
-        "open": 42,
+        "open": 36,
         "won": 6,
-        "lost": 7,
+        "lost": 13,
         "total": 55
       },
       {
         "week": "W40",
-        "open": 46,
+        "open": 42,
         "won": 5,
-        "lost": 13,
-        "total": 64
+        "lost": 20,
+        "total": 67
       }
     ],
     "weekly_conversion": [
@@ -348,19 +348,19 @@
       },
       {
         "week": "W39",
-        "activities": 102,
+        "activities": 94,
         "deals_created": 55,
         "won": 6,
-        "to_deal_pct": 53.9,
-        "to_won_pct": 5.9
+        "to_deal_pct": 58.5,
+        "to_won_pct": 6.4
       },
       {
         "week": "W40",
-        "activities": 78,
-        "deals_created": 64,
+        "activities": 96,
+        "deals_created": 67,
         "won": 5,
-        "to_deal_pct": 82.1,
-        "to_won_pct": 6.4
+        "to_deal_pct": 69.8,
+        "to_won_pct": 5.2
       }
     ]
   },
