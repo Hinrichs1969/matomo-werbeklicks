@@ -56,15 +56,26 @@ def log(msg):
         f.write(line + "\n")
 
 
-def matomo_post(params):
+def matomo_post(params, retries=3, backoff=120):
     p = dict(params)
     p["token_auth"] = TOKEN
     p["idSite"]     = str(SITE_ID)
     p["format"]     = "JSON"
     data = urllib.parse.urlencode(p).encode()
     req  = urllib.request.Request(BASE_URL, data=data, method="POST")
-    with urllib.request.urlopen(req, timeout=180) as r:
-        return json.loads(r.read())
+    import time
+    last_exc = None
+    for attempt in range(1, retries + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r:
+                return json.loads(r.read())
+        except Exception as exc:
+            last_exc = exc
+            if attempt < retries:
+                log(f"  Matomo-Fehler (Versuch {attempt}/{retries}): {exc} – warte {backoff}s …")
+                time.sleep(backoff)
+            else:
+                raise last_exc
 
 
 def fetch_daily_data():

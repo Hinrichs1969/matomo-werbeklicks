@@ -25,6 +25,12 @@ jobs:
         env:
           MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
         run: python matomo-canvas-update.py
+        # Bei vorübergehendem Serverfehler bis zu 2× wiederholen (je 3 Min. Pause)
+      - name: Matomo-Skript – Retry 1
+        if: failure()
+        env:
+          MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
+        run: sleep 180 && python matomo-canvas-update.py
 
       - name: HTML-Report committen und pushen
         run: |
