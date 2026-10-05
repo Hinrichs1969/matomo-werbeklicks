@@ -138,18 +138,30 @@ def fetch_monthly_data():
     return result
 
 
-def fetch_advertiser_clicks(adv):
+def fetch_clicks_for_segment(seg):
+    """Liefert replica_box_link_click-Anzahl für ein gegebenes Segment."""
     raw = matomo_post({
         "module": "API", "method": "Events.getName",
         "period": "range", "date": f"{START},{TODAY}",
         "filter_limit": "20",
-        "segment": adv["seg"],
+        "segment": seg,
     })
     if isinstance(raw, list):
         for e in raw:
             if e.get("label") == "replica_box_link_click":
-                return adv["key"], e.get("nb_events", 0)
-    return adv["key"], 0
+                return e.get("nb_events", 0)
+    return 0
+
+
+def fetch_advertiser_clicks(adv):
+    """Liefert Klicks gesamt, BZ und HK für einen Werbekunden."""
+    seg = adv["seg"]
+    seg_bz = seg + "%3Bdimension2%3D%40bohme-zeitung"
+    seg_hk = seg + "%3Bdimension2%3D%3Dheidekurier"
+    total = fetch_clicks_for_segment(seg)
+    bz    = fetch_clicks_for_segment(seg_bz)
+    hk    = fetch_clicks_for_segment(seg_hk)
+    return adv["key"], {"total": total, "bz": bz, "hk": hk}
 
 
 def js_bool(v):
@@ -161,15 +173,18 @@ def generate_html(daily, monthly, adv_clicks):
     total_clicks = sum(d["clicks"] for d in daily)
     total_views  = sum(d["views"]  for d in daily)
     total_banner = sum(d["banner"] for d in daily)
-    ident_clicks = sum(adv_clicks.get(a["key"], 0) for a in ADVERTISERS)
+    ident_clicks = sum(adv_clicks.get(a["key"], {}).get("total", 0) for a in ADVERTISERS)
     avg_ctr      = f"{(total_clicks / total_views * 100):.1f}" if total_views else "0.0"
 
-    sorted_adv = sorted(ADVERTISERS, key=lambda a: adv_clicks.get(a["key"], 0), reverse=True)
+    sorted_adv = sorted(ADVERTISERS, key=lambda a: adv_clicks.get(a["key"], {}).get("total", 0), reverse=True)
 
     # Tabellen-Zeilen
     adv_rows_html = ""
     for a in sorted_adv:
-        k = adv_clicks.get(a["key"], 0)
+        d     = adv_clicks.get(a["key"], {"total": 0, "bz": 0, "hk": 0})
+        k     = d["total"]
+        bz    = d["bz"]
+        hk    = d["hk"]
         share = f"{(k / total_clicks * 100):.1f}" if total_clicks else "0.0"
         utm_pill   = '<span class="pill pill-green">ja</span>'   if a["utm"]     else '<span class="pill pill-orange">nein</span>'
         klaer_pill = '<span class="pill pill-orange">klaeren</span>' if a["klaeren"] else '<span class="pill pill-green">aktiv</span>'
@@ -178,6 +193,8 @@ def generate_html(daily, monthly, adv_clicks):
           <td><strong>{a["name"]}</strong></td>
           <td class="url">{a["url"]}</td>
           <td class="right"><strong>{k:,}</strong></td>
+          <td class="right bz">{bz:,}</td>
+          <td class="right hk">{hk:,}</td>
           <td class="center">{share}&nbsp;%</td>
           <td class="center">{utm_pill}</td>
           <td class="center">{klaer_pill}</td>
@@ -231,6 +248,8 @@ def generate_html(daily, monthly, adv_clicks):
   .pill {{ display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }}
   .pill-green {{ background: #dcfce7; color: #166534; }}
   .pill-orange {{ background: #fef3c7; color: #92400e; }}
+  .bz {{ color: #1d4ed8; }}
+  .hk {{ color: #15803d; }}
   .bar-chart {{ margin-bottom: 6px; }}
   .bar-row {{ display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }}
   .bar-label {{ width: 44px; font-size: 10px; color: #555; text-align: right; flex-shrink: 0; }}
@@ -284,7 +303,10 @@ Stand: {TODAY_DE} &middot; Zeitraum: 01.07.2026&ndash;{TODAY_DE} &middot; Automa
 <table>
   <thead><tr>
     <th>Werbekunde</th><th>Ziel-URL</th>
-    <th class="right">Klicks</th><th class="right center">Anteil</th>
+    <th class="right">Klicks gesamt</th>
+    <th class="right bz">davon BZ</th>
+    <th class="right hk">davon HK</th>
+    <th class="right center">Anteil</th>
     <th class="center">UTM</th><th class="center">Status</th>
   </tr></thead>
   <tbody>{adv_rows_html}</tbody>
@@ -340,12 +362,12 @@ renderChart('chart-banner', DAILY_LABELS, DAILY_BANNER, 'banner');
 def generate_canvas(daily, monthly, adv_clicks):
     total_clicks = sum(d["clicks"] for d in daily)
     total_views  = sum(d["views"]  for d in daily)
-    ident_clicks = sum(adv_clicks.get(a["key"], 0) for a in ADVERTISERS)
+    ident_clicks = sum(adv_clicks.get(a["key"], {}).get("total", 0) for a in ADVERTISERS)
     avg_ctr      = f"{(total_clicks / total_views * 100):.1f}" if total_views else "0.0"
 
-    top_adv = sorted(ADVERTISERS, key=lambda a: adv_clicks.get(a["key"], 0), reverse=True)
+    top_adv = sorted(ADVERTISERS, key=lambda a: adv_clicks.get(a["key"], {}).get("total", 0), reverse=True)
     top3 = ", ".join(
-        f'{a["name"]} ({adv_clicks.get(a["key"], 0):,})'.replace(",", ".")
+        f'{a["name"]} ({adv_clicks.get(a["key"], {}).get("total", 0):,})'.replace(",", ".")
         for a in top_adv[:3]
     )
 
@@ -358,7 +380,7 @@ def generate_canvas(daily, monthly, adv_clicks):
         for m in monthly
     )
     adv_rows = "\n  ".join(
-        f'{{ name: "{a["name"]}", url: "{a["url"]}", klicks: {adv_clicks.get(a["key"], 0)}, utm: {js_bool(a["utm"])}, klaeren: {js_bool(a["klaeren"])} }},'
+        f'{{ name: "{a["name"]}", url: "{a["url"]}", klicks: {adv_clicks.get(a["key"], {}).get("total", 0)}, bz: {adv_clicks.get(a["key"], {}).get("bz", 0)}, hk: {adv_clicks.get(a["key"], {}).get("hk", 0)}, utm: {js_bool(a["utm"])}, klaeren: {js_bool(a["klaeren"])} }},'
         for a in ADVERTISERS
     )
 
@@ -519,7 +541,7 @@ def main():
             for future in as_completed(futures):
                 key, clicks = future.result()
                 adv_clicks[key] = clicks
-                log(f"  {key}: {clicks}")
+                log(f"  {key}: gesamt={clicks['total']}  BZ={clicks['bz']}  HK={clicks['hk']}")
 
         log("Generiere und schreibe Canvas...")
         canvas_code = generate_canvas(daily, monthly, adv_clicks)
