@@ -36,7 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Werbeklicks-Report-aktuell.html
+          git add Werbeklicks-Report-aktuell.html berichte/
           git diff --cached --quiet || git commit -m "Werbeklicks-Report aktualisiert $(date +'%Y-%m-%d')"
           git pull --rebase origin main
           git push

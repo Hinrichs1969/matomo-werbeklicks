@@ -153,25 +153,21 @@ def fetch_monthly_data():
     return result
 
 
-def fetch_clicks_for_segment(seg):
-    """Liefert replica_box_link_click-Anzahl für ein gegebenes Segment."""
+def fetch_advertiser_clicks(adv):
+    """Liefert Klicks (klickbar + banner) für einen Werbekunden."""
     raw = matomo_post({
         "module": "API", "method": "Events.getName",
         "period": "range", "date": f"{START},{TODAY}",
         "filter_limit": "20",
-        "segment": seg,
+        "segment": adv["seg"],
     })
+    klickbar = banner = 0
     if isinstance(raw, list):
         for e in raw:
-            if e.get("label") == "replica_box_link_click":
-                return e.get("nb_events", 0)
-    return 0
-
-
-def fetch_advertiser_clicks(adv):
-    """Liefert Klicks gesamt für einen Werbekunden (ohne BZ/HK-Split)."""
-    total = fetch_clicks_for_segment(adv["seg"])
-    return adv["key"], total
+            n = e.get("label", "")
+            if n == "replica_box_link_click": klickbar = int(e.get("nb_events", 0))
+            if n == "banner_click":           banner   = int(e.get("nb_events", 0))
+    return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
 
 
 def fetch_bz_hk_batch():
@@ -229,18 +225,23 @@ def generate_html(daily, monthly, adv_clicks):
     # Tabellen-Zeilen
     adv_rows_html = ""
     for a in sorted_adv:
-        d     = adv_clicks.get(a["key"], {"total": 0, "bz": 0, "hk": 0})
-        k     = d["total"]
-        bz    = d["bz"]
-        hk    = d["hk"]
-        share = f"{(k / total_clicks * 100):.1f}" if total_clicks else "0.0"
+        d        = adv_clicks.get(a["key"], {"total": 0, "klickbar": 0, "banner": 0, "bz": 0, "hk": 0})
+        k        = d["total"]
+        klickbar = d.get("klickbar", 0)
+        banner   = d.get("banner", 0)
+        bz       = d["bz"]
+        hk       = d["hk"]
+        share    = f"{(k / total_clicks * 100):.1f}" if total_clicks else "0.0"
         utm_pill   = '<span class="pill pill-green">ja</span>'   if a["utm"]     else '<span class="pill pill-orange">nein</span>'
         klaer_pill = '<span class="pill pill-orange">klaeren</span>' if a["klaeren"] else '<span class="pill pill-green">aktiv</span>'
+        bericht_url = f"berichte/{a['key']}.html"
         adv_rows_html += f"""
         <tr>
-          <td><strong>{a["name"]}</strong></td>
+          <td><strong>{a["name"]}</strong><br><a href="{bericht_url}" style="font-size:10px;color:#6b7280">&#128196; Kundenbericht</a></td>
           <td class="url">{a["url"]}</td>
           <td class="right"><strong>{k:,}</strong></td>
+          <td class="right" style="color:#6366f1">{klickbar:,}</td>
+          <td class="right" style="color:#0891b2">{banner:,}</td>
           <td class="right bz">{bz:,}</td>
           <td class="right hk">{hk:,}</td>
           <td class="center">{share}&nbsp;%</td>
@@ -352,6 +353,8 @@ Stand: {TODAY_DE} &middot; Zeitraum: 01.07.2026&ndash;{TODAY_DE} &middot; Automa
   <thead><tr>
     <th>Werbekunde</th><th>Ziel-URL</th>
     <th class="right">Klicks gesamt</th>
+    <th class="right" style="color:#6366f1">Klickbar</th>
+    <th class="right" style="color:#0891b2">Banner</th>
     <th class="right bz">davon BZ</th>
     <th class="right hk">davon HK</th>
     <th class="right center">Anteil</th>
@@ -569,6 +572,163 @@ export default function MatomoWerbekundenDashboard() {{
 """
 
 
+def generate_customer_html(adv, clicks):
+    """Generiert einen druckfertigen Einzelbericht pro Werbekunde."""
+    name     = adv["name"]
+    url_disp = adv["url"]
+    total    = clicks.get("total", 0)
+    klickbar = clicks.get("klickbar", 0)
+    banner   = clicks.get("banner", 0)
+    bz       = clicks.get("bz", 0)
+    hk       = clicks.get("hk", 0)
+    mag      = max(0, total - bz - hk)
+
+    def pct(v):
+        return f"{(v / total * 100):.0f}" if total else "–"
+
+    def bar(v, max_v, color):
+        w = round(v / max_v * 100) if max_v else 0
+        return f'<div style="background:{color};height:12px;border-radius:3px;width:{w}%;min-width:2px"></div>'
+
+    max_pub = max(bz, hk, mag, 1)
+
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klick-Bericht – {name}</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 720px; margin: 0 auto; }}
+  .logo-bar {{ display:flex; align-items:center; gap:12px; margin-bottom:24px; border-bottom:2px solid #e4e7ec; padding-bottom:14px; }}
+  .logo-text {{ font-size:15px; font-weight:700; color:#1e40af; letter-spacing:-.01em; }}
+  .logo-sub  {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }}
+  h1 {{ font-size:20px; font-weight:700; margin-bottom:4px; }}
+  .subtitle {{ font-size:12px; color:#6b7280; margin-bottom:24px; }}
+  .kpi-grid {{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }}
+  .kpi {{ border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }}
+  .kpi-label {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }}
+  .kpi-value {{ font-size:26px; font-weight:800; }}
+  .kpi-sub   {{ font-size:10px; color:#9ca3af; margin-top:2px; }}
+  .section {{ margin-bottom:24px; }}
+  .section-title {{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+                    color:#6b7280; border-bottom:1px solid #e4e7ec; padding-bottom:6px; margin-bottom:12px; }}
+  .split-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
+  .split-label {{ width:120px; font-size:12px; font-weight:600; flex-shrink:0; }}
+  .split-bar   {{ flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }}
+  .split-val   {{ width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }}
+  .split-pct   {{ width:36px; text-align:right; font-size:11px; color:#9ca3af; }}
+  .note {{ background:#f0f9ff; border-left:3px solid #0ea5e9; padding:10px 14px;
+           font-size:11px; color:#0c4a6e; border-radius:0 6px 6px 0; margin-bottom:20px; }}
+  footer {{ margin-top:30px; padding-top:10px; border-top:1px solid #e4e7ec;
+            font-size:10px; color:#9ca3af; line-height:1.6; }}
+  .print-btn {{ display:inline-block; margin-bottom:18px; padding:8px 18px; background:#1d4ed8;
+               color:#fff; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
+               border:none; text-decoration:none; }}
+  @media print {{ .print-btn {{ display:none; }} @page {{ margin:14mm 16mm; size:A4; }} }}
+</style>
+</head>
+<body>
+
+<div class="logo-bar">
+  <div>
+    <div class="logo-text">Böhme-Zeitung / Heide-Kurier</div>
+    <div class="logo-sub">Prenly E-Paper &middot; Online-Werbung</div>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
+
+<h1>Klick-Bericht: {name}</h1>
+<p class="subtitle">Zeitraum: 01.07.2026 – {TODAY_DE} &middot; Ziel-URL: {url_disp} &middot; Stand: {TODAY_DE}</p>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-label">Klicks gesamt</div>
+    <div class="kpi-value">{total:,}</div>
+    <div class="kpi-sub">seit 01.07.2026</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Klickbare Anzeige</div>
+    <div class="kpi-value" style="color:#6366f1">{klickbar:,}</div>
+    <div class="kpi-sub">replica_box_link_click</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Banner / Interstitial</div>
+    <div class="kpi-value" style="color:#0891b2">{banner:,}</div>
+    <div class="kpi-sub">banner_click</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Verteilung nach Publikation</div>
+  <div class="split-row">
+    <div class="split-label">Böhme-Zeitung</div>
+    <div class="split-bar">{bar(bz, max_pub, "#1d4ed8")}</div>
+    <div class="split-val">{bz:,}</div>
+    <div class="split-pct">{pct(bz)}&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Heide-Kurier</div>
+    <div class="split-bar">{bar(hk, max_pub, "#16a34a")}</div>
+    <div class="split-val">{hk:,}</div>
+    <div class="split-pct">{pct(hk)}&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Magazin</div>
+    <div class="split-bar">{bar(mag, max_pub, "#9ca3af")}</div>
+    <div class="split-val">{mag:,}</div>
+    <div class="split-pct">{pct(mag)}&thinsp;%</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Verteilung nach Anzeigenformat</div>
+  <div class="split-row">
+    <div class="split-label">Klickbare Anzeige</div>
+    <div class="split-bar">{bar(klickbar, max(klickbar, banner, 1), "#6366f1")}</div>
+    <div class="split-val">{klickbar:,}</div>
+    <div class="split-pct">{pct(klickbar)}&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Banner / Interstitial</div>
+    <div class="split-bar">{bar(banner, max(klickbar, banner, 1), "#0891b2")}</div>
+    <div class="split-val">{banner:,}</div>
+    <div class="split-pct">{pct(banner)}&thinsp;%</div>
+  </div>
+</div>
+
+<div class="note">
+  Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 
+  Erfasst werden ausschlie&szlig;lich Interaktionen im Prenly-E-Paper der 
+  B&ouml;hme-Zeitung und des Heide-Kuriers. Der Bericht wird t&auml;glich automatisch aktualisiert.
+</div>
+
+<footer>
+  B&ouml;hme-Zeitung / Heide-Kurier &middot; Prenly E-Paper &middot;
+  Generiert am {TODAY_DE} &middot; matomo.mundschenk.de &middot; Site ID 14
+</footer>
+
+</body>
+</html>
+"""
+
+
+def generate_all_customer_pages(adv_clicks):
+    """Schreibt pro Werbekunde eine individuelle HTML-Seite nach berichte/<key>.html."""
+    berichte_dir = os.path.join(_HERE, "berichte")
+    os.makedirs(berichte_dir, exist_ok=True)
+    for a in ADVERTISERS:
+        clicks = adv_clicks.get(a["key"], {"total": 0, "klickbar": 0, "banner": 0, "bz": 0, "hk": 0})
+        html   = generate_customer_html(a, clicks)
+        path   = os.path.join(berichte_dir, f"{a['key']}.html")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+    log(f"  {len(ADVERTISERS)} Kundenberichte gespeichert in {berichte_dir}")
+
+
 def main():
     log("=== Matomo Canvas Update gestartet ===")
     log(f"Zeitraum: {START} - {TODAY}")
@@ -587,9 +747,9 @@ def main():
         with ThreadPoolExecutor(max_workers=3) as ex:
             futures = {ex.submit(fetch_advertiser_clicks, a): a for a in ADVERTISERS}
             for future in as_completed(futures):
-                key, total = future.result()
-                adv_clicks_raw[key] = total
-                log(f"  {key}: {total}")
+                key, data = future.result()
+                adv_clicks_raw[key] = data
+                log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']}")
 
         log("Hole BZ/HK-Split (2 Batch-Abfragen, nicht blockierend)...")
         try:
@@ -601,10 +761,11 @@ def main():
 
         adv_clicks = {}
         for a in ADVERTISERS:
-            total = adv_clicks_raw.get(a["key"], 0)
-            adv_clicks[a["key"]] = compute_bz_hk_split(total, a, bz_hits, hk_hits)
+            raw = adv_clicks_raw.get(a["key"], {"klickbar": 0, "banner": 0, "total": 0})
+            split = compute_bz_hk_split(raw["total"], a, bz_hits, hk_hits)
+            adv_clicks[a["key"]] = {**raw, "bz": split["bz"], "hk": split["hk"]}
             c = adv_clicks[a["key"]]
-            log(f"  {a['key']}: gesamt={c['total']}  BZ={c['bz']}  HK={c['hk']}")
+            log(f"  {a['key']}: gesamt={c['total']} klickbar={c['klickbar']} banner={c['banner']} BZ={c['bz']} HK={c['hk']}")
 
         log("Generiere und schreibe Canvas...")
         canvas_code = generate_canvas(daily, monthly, adv_clicks)
@@ -622,6 +783,8 @@ def main():
             f.write(html_code)
         log(f"HTML gespeichert: {HTML_OUT}")
 
+        log("Generiere individuelle Kundenberichte...")
+        generate_all_customer_pages(adv_clicks)
         log("=== Update erfolgreich abgeschlossen ===")
 
     except Exception as e:
