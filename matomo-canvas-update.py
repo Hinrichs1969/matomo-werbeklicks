@@ -52,7 +52,14 @@ ADVERTISERS = [
     {"key": "haenel",         "name": "Haenel Kachelofenbau",          "url": "haenel-kachelofenbau.de",        "seg": "dimension14%3D%40haenel-kachelofenbau.de",                                                                                                                                                     "utm": False, "klaeren": False},
     {"key": "suedsee",        "name": "Südsee-Camp",                   "url": "suedsee-camp.de",                "seg": "dimension14%3D%40suedsee-camp.de",                                                                                                                                                             "utm": True,  "klaeren": False},
     {"key": "roeders",        "name": "Gebrüder Röders",               "url": "gebrueder-roeders.com",          "seg": "dimension14%3D%40gebrueder-roeders.com",                                                                                                                                                       "utm": True,  "klaeren": False},
-    {"key": "nossol",         "name": "Nossol",                        "url": "nossol.org",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fnossol.org%2F%3Futm_campaign%3Dnossol",                                                                                                                         "utm": True,  "klaeren": False},
+    {"key": "nossol",         "name": "Nossol",                        "url": "nossol.org",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fnossol.org%2F%3Futm_campaign%3Dnossol",                                                                                                 "utm": True,  "klaeren": False},
+    {"key": "drk_munster",    "name": "DRK Alten-/Pflegeheim Munster", "url": "drk-munster.de",                 "seg": "dimension14%3D%40drk-munster.de",                                                                                                                                                "utm": False, "klaeren": False},
+    {"key": "schroeder",      "name": "Otto Schröder Tiefbau",          "url": "schroeder-tiefbau.de",           "seg": "dimension14%3D%40schroeder-tiefbau.de",                                                                                                                                          "utm": False, "klaeren": False},
+    {"key": "edeka_meyer",    "name": "Edeka Meyer Neuenkirchen",       "url": "edeka-meyer-neuenkirchen.de",    "seg": "dimension14%3D%40edeka-meyer-neuenkirchen.de",                                                                                                                                   "utm": False, "klaeren": False},
+    {"key": "klinik_fb",      "name": "Klinik Fallingbostel",           "url": "klinik-fallingbostel.de",        "seg": "dimension14%3D%40klinik-fallingbostel.de",                                                                                                                                      "utm": False, "klaeren": False},
+    {"key": "wtz_touristik",  "name": "Wietzendorf Touristik (Honigfest)","url": "wietzendorf-touristik.de",     "seg": "dimension14%3D%40wietzendorf-touristik.de",                                                                                                                                     "utm": False, "klaeren": False},
+    {"key": "covestro",       "name": "Covestro",                       "url": "covestro.com",                   "seg": "dimension14%3D%40covestro.com",                                                                                                                                                  "utm": False, "klaeren": False},
+    {"key": "pflegejobs",     "name": "CMS / Pflegejobs",               "url": "pflegejobs-altenpflege.de",      "seg": "dimension14%3D%40pflegejobs-altenpflege.de",                                                                                                                                    "utm": False, "klaeren": True },
 ]
 
 
@@ -73,9 +80,11 @@ def matomo_post(params, retries=3, backoff=120):
     req  = urllib.request.Request(BASE_URL, data=data, method="POST")
     import time
     last_exc = None
+    # Batch-Abfragen (CustomDimensions) bekommen mehr Zeit
+    timeout = 360 if params.get("method","").startswith("CustomDimensions") else 180
     for attempt in range(1, retries + 1):
         try:
-            with urllib.request.urlopen(req, timeout=180) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 return json.loads(r.read())
         except Exception as exc:
             last_exc = exc
@@ -173,7 +182,7 @@ def fetch_bz_hk_batch():
             "period": "range", "date": f"{START},{TODAY}",
             "filter_limit": "300",
             "segment": seg,
-        }, retries=1, backoff=10)
+        }, retries=1, backoff=10)  # Timeout 300s – langsame Abfrage
         if isinstance(raw, list):
             for e in raw:
                 label = e.get("label", "")
