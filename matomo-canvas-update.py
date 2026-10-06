@@ -173,7 +173,7 @@ def fetch_bz_hk_batch():
             "period": "range", "date": f"{START},{TODAY}",
             "filter_limit": "300",
             "segment": seg,
-        })
+        }, retries=1, backoff=10)
         if isinstance(raw, list):
             for e in raw:
                 label = e.get("label", "")
@@ -576,9 +576,13 @@ def main():
                 adv_clicks_raw[key] = total
                 log(f"  {key}: {total}")
 
-        log("Hole BZ/HK-Split (2 Batch-Abfragen)...")
-        bz_hits, hk_hits = fetch_bz_hk_batch()
-        log(f"  BZ-URLs: {len(bz_hits)}, HK-URLs: {len(hk_hits)}")
+        log("Hole BZ/HK-Split (2 Batch-Abfragen, nicht blockierend)...")
+        try:
+            bz_hits, hk_hits = fetch_bz_hk_batch()
+            log(f"  BZ-URLs: {len(bz_hits)}, HK-URLs: {len(hk_hits)}")
+        except Exception as e:
+            log(f"  BZ/HK-Split nicht verfügbar ({e}) – fahre ohne Split fort")
+            bz_hits, hk_hits = {}, {}
 
         adv_clicks = {}
         for a in ADVERTISERS:
