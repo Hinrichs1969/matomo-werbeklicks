@@ -154,14 +154,47 @@ def fetch_clicks_for_segment(seg):
 
 
 def fetch_advertiser_clicks(adv):
-    """Liefert Klicks gesamt, BZ und HK für einen Werbekunden."""
-    seg = adv["seg"]
-    seg_bz = seg + "%3Bdimension2%3D%40bohme-zeitung"
-    seg_hk = seg + "%3Bdimension2%3D%3Dheidekurier"
-    total = fetch_clicks_for_segment(seg)
-    bz    = fetch_clicks_for_segment(seg_bz)
-    hk    = fetch_clicks_for_segment(seg_hk)
-    return adv["key"], {"total": total, "bz": bz, "hk": hk}
+    """Liefert Klicks gesamt für einen Werbekunden (ohne BZ/HK-Split)."""
+    total = fetch_clicks_for_segment(adv["seg"])
+    return adv["key"], total
+
+
+def fetch_bz_hk_batch():
+    """2 Batch-Abfragen: alle destination_urls aufgeteilt nach BZ und HK."""
+    bz_hits = {}
+    hk_hits = {}
+    for seg, target in [
+        ("dimension2%3D%40bohme-zeitung", bz_hits),
+        ("dimension2%3D%3Dheidekurier",   hk_hits),
+    ]:
+        raw = matomo_post({
+            "module": "API", "method": "CustomDimensions.getCustomDimension",
+            "idDimension": "14",
+            "period": "range", "date": f"{START},{TODAY}",
+            "filter_limit": "300",
+            "segment": seg,
+        })
+        if isinstance(raw, list):
+            for e in raw:
+                label = e.get("label", "")
+                if label.startswith("http"):
+                    target[label] = e.get("nb_hits", 0)
+    return bz_hits, hk_hits
+
+
+def compute_bz_hk_split(total, adv, bz_hits, hk_hits):
+    """Berechnet BZ/HK-Split per Ratio aus Batch-Daten."""
+    url_key = adv["url"]
+    bz = sum(v for k, v in bz_hits.items() if url_key in k)
+    hk = sum(v for k, v in hk_hits.items() if url_key in k)
+    denom = bz + hk
+    if denom == 0:
+        return {"total": total, "bz": 0, "hk": 0}
+    return {
+        "total": total,
+        "bz": round(total * bz / denom),
+        "hk": round(total * hk / denom),
+    }
 
 
 def js_bool(v):
@@ -535,13 +568,24 @@ def main():
         log(f"  {len(monthly)} Monate geladen")
 
         log("Hole Werbekunden-Klicks (parallel)...")
-        adv_clicks = {}
+        adv_clicks_raw = {}
         with ThreadPoolExecutor(max_workers=3) as ex:
             futures = {ex.submit(fetch_advertiser_clicks, a): a for a in ADVERTISERS}
             for future in as_completed(futures):
-                key, clicks = future.result()
-                adv_clicks[key] = clicks
-                log(f"  {key}: gesamt={clicks['total']}  BZ={clicks['bz']}  HK={clicks['hk']}")
+                key, total = future.result()
+                adv_clicks_raw[key] = total
+                log(f"  {key}: {total}")
+
+        log("Hole BZ/HK-Split (2 Batch-Abfragen)...")
+        bz_hits, hk_hits = fetch_bz_hk_batch()
+        log(f"  BZ-URLs: {len(bz_hits)}, HK-URLs: {len(hk_hits)}")
+
+        adv_clicks = {}
+        for a in ADVERTISERS:
+            total = adv_clicks_raw.get(a["key"], 0)
+            adv_clicks[a["key"]] = compute_bz_hk_split(total, a, bz_hits, hk_hits)
+            c = adv_clicks[a["key"]]
+            log(f"  {a['key']}: gesamt={c['total']}  BZ={c['bz']}  HK={c['hk']}")
 
         log("Generiere und schreibe Canvas...")
         canvas_code = generate_canvas(daily, monthly, adv_clicks)
