@@ -28,7 +28,7 @@ TODAY    = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_DE = datetime.date.today().strftime("%d.%m.%Y")
 
 ADVERTISERS = [
-    {"key": "viavox",         "name": "viavox.io",                    "url": "viavox.io",                      "seg": "dimension14%3D%40viavox.io",                                                                                                                                                                        "utm": True,  "klaeren": False},
+    {"key": "viavox",         "name": "viavox.io",                    "url": "viavox.io",                      "seg": "dimension14%3D%40viavox.io",                                                                                                                                                                        "utm": True,  "klaeren": False, "banner": True},
     {"key": "vitamin_k4",     "name": "vitamin-k4.de",                "url": "vitamin-k4.de",                  "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.vitamin-k4.de",                                                                                                                                                  "utm": False, "klaeren": False},
     {"key": "smurfitkappa",   "name": "smurfitkappa",                 "url": "smurfitkappa.concludis.de",      "seg": "dimension14%3D%3Dhttps%3A%2F%2Fsmurfitkappa.concludis.de%2Fprj%2Fshw%2F643fb86c8172fb56d8898497eb682c27_0%2F13796%2F%3Futm_campaign%3Dsmurfitkappa",                                                "utm": True,  "klaeren": False},
     {"key": "harbort",        "name": "Harbort GmbH & Co. KG",        "url": "harbort.de/karriere",            "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.harbort.de%2Fkarriere%3Futm_campaign%3Dharbort",                                                                                                                "utm": True,  "klaeren": False},
@@ -49,7 +49,7 @@ ADVERTISERS = [
     {"key": "workandlife",    "name": "Work & Life Heidekreis",        "url": "workandlife-heidekreis.de",      "seg": "dimension14%3D%40workandlife-heidekreis.de",                                                                                                                                                    "utm": True,  "klaeren": False},
     {"key": "schneverdingen", "name": "Stadt Schneverdingen",          "url": "schneverdingen.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.schneverdingen.de%2Fdesktopdefault.aspx%2Ftabid-7207%2F%3Futm_campaign%3Dstadt_schneverdingen",                                                              "utm": True,  "klaeren": False},
     {"key": "lorenzdental",   "name": "Lorenz Dental Soltau",          "url": "karriere-lorenzdental-soltau.de","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.karriere-lorenzdental-soltau.de%2F%3Futm_campaign%3Dlorenzdental",                                                                                        "utm": True,  "klaeren": False},
-    {"key": "haenel",         "name": "Haenel Kachelofenbau",          "url": "haenel-kachelofenbau.de",        "seg": "dimension14%3D%40haenel-kachelofenbau.de",                                                                                                                                                     "utm": False, "klaeren": False},
+    {"key": "haenel",         "name": "Haenel Kachelofenbau",          "url": "haenel-kachelofenbau.de",        "seg": "dimension14%3D%40haenel-kachelofenbau.de",                                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
     {"key": "suedsee",        "name": "Südsee-Camp",                   "url": "suedsee-camp.de",                "seg": "dimension14%3D%40suedsee-camp.de",                                                                                                                                                             "utm": True,  "klaeren": False},
     {"key": "roeders",        "name": "Gebrüder Röders",               "url": "gebrueder-roeders.com/karriere", "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.gebrueder-roeders.com%2Fkarriere%2Fausbildung-studium%2F%3Futm_campaign%3Dgebrueder-roeders",                                                                    "utm": True,  "klaeren": False},
     {"key": "nossol",         "name": "Nossol",                        "url": "nossol.org",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fnossol.org%2F%3Futm_campaign%3Dnossol",                                                                                                 "utm": True,  "klaeren": False},
@@ -57,13 +57,13 @@ ADVERTISERS = [
     {"key": "schroeder",      "name": "Otto Schröder Tiefbau",          "url": "schroeder-tiefbau.de/unternehmen","seg": "dimension14%3D%40schroeder-tiefbau.de%2Funternehmen",                                                                                                                                    "utm": True,  "klaeren": False},
     {"key": "edeka_meyer",    "name": "Edeka Meyer Neuenkirchen",       "url": "edeka-meyer-neuenkirchen.de/karriere","seg": "dimension14%3D%40edeka-meyer-neuenkirchen.de%2Fkarriere",                                                                                                                           "utm": True,  "klaeren": False},
     {"key": "klinik_fb",      "name": "Klinik Fallingbostel",           "url": "klinik-fallingbostel.de/karriere","seg": "dimension14%3D%40klinik-fallingbostel.de%2Fkarriere",                                                                                                                                    "utm": False, "klaeren": False},
-    {"key": "wtz_touristik",  "name": "Wietzendorf Touristik (Honigfest)","url": "wietzendorf-touristik.de",     "seg": "dimension14%3D%40wietzendorf-touristik.de",                                                                                                                                     "utm": False, "klaeren": False},
+    {"key": "wtz_touristik",  "name": "Wietzendorf Touristik (Honigfest)","url": "wietzendorf-touristik.de",     "seg": "dimension14%3D%40wietzendorf-touristik.de",                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
     {"key": "covestro",       "name": "Covestro",                       "url": "covestro.com/de/career",         "seg": "dimension14%3D%40covestro.com%2Fde%2Fcareer",                                                                                                                                            "utm": True,  "klaeren": False},
     {"key": "pflegejobs",     "name": "CMS / Pflegejobs",               "url": "pflegejobs-altenpflege.de/azubi","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.pflegejobs-altenpflege.de%2Fazubi-pflegefachfrau-mann-w-m-d%2F%3Futm_campaign%3DHaus_Zuflucht",                                                      "utm": True,  "klaeren": False},
     # Aus Pipedrive-Recherche Oktober 2026
     {"key": "grube",          "name": "Grube KG Forstgerätestelle",     "url": "grube.de/karriere/ausbildung",   "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.grube.de%2Fkarriere%2Fausbildung%2F",                                                                                                          "utm": False, "klaeren": False},
     {"key": "kahnwald",       "name": "Kahnwald Optik-Hörgeräte",       "url": "optikkahnwald.de",               "seg": "dimension14%3D%40optikkahnwald.de",                                                                                                                                             "utm": False, "klaeren": True },
-    {"key": "olaf_meyer",     "name": "Garten- u. Landschaftsbau Meyer","url": "meyer-gartenbau-soltau.de",      "seg": "dimension14%3D%40meyer-gartenbau-soltau.de",                                                                                                                                   "utm": False, "klaeren": True },
+    {"key": "olaf_meyer",     "name": "Garten- u. Landschaftsbau Meyer","url": "meyer-gartenbau-soltau.de",      "seg": "dimension14%3D%40meyer-gartenbau-soltau.de",                                                                                                                                   "utm": False, "klaeren": True,  "banner": True },
     {"key": "msm_walsrode",   "name": "MSM Walsrode",                   "url": "msm-walsrode.com",               "seg": "dimension14%3D%40msm-walsrode.com",                                                                                                                                             "utm": False, "klaeren": True },
     {"key": "heidekreis",     "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
 ]
@@ -154,19 +154,28 @@ def fetch_monthly_data():
 
 
 def fetch_advertiser_clicks(adv):
-    """Liefert Klicks (klickbar + banner) für einen Werbekunden."""
+    """Liefert Klicks (klickbar + banner) für einen Werbekunden.
+
+    banner_click-Events werden NUR gezählt wenn adv['banner']=True.
+    Hintergrund: Matomo setzt dimension14 visit-scope – Klicks auf fremde
+    Banner in derselben Sitzung werden fälschlicherweise dem Werbekunden
+    zugeordnet, der zuletzt eine klickbare Anzeige angeklickt hat.
+    """
     raw = matomo_post({
         "module": "API", "method": "Events.getName",
         "period": "range", "date": f"{START},{TODAY}",
         "filter_limit": "20",
         "segment": adv["seg"],
     })
+    has_banner_product = adv.get("banner", False)
     klickbar = banner = 0
     if isinstance(raw, list):
         for e in raw:
             n = e.get("label", "")
-            if n == "replica_box_link_click": klickbar = int(e.get("nb_events", 0))
-            if n == "banner_click":           banner   = int(e.get("nb_events", 0))
+            if n == "replica_box_link_click":
+                klickbar = int(e.get("nb_events", 0))
+            if n == "banner_click" and has_banner_product:
+                banner = int(e.get("nb_events", 0))
     return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
 
 
@@ -373,7 +382,7 @@ Stand: {TODAY_DE} &middot; Zeitraum: 01.07.2026&ndash;{TODAY_DE} &middot; Automa
     <th>Werbekunde</th><th>Ziel-URL</th>
     <th class="right">Klicks gesamt</th>
     <th class="right" style="color:#6366f1" title="replica_box_link_click: Klicks auf PDF-eingebettete Links (klickbare Anzeige)">Klickbar</th>
-    <th class="right" style="color:#0891b2" title="banner_click: HTML-Overlay-Formate (Interstitial, E-Paper-Banner, Rätselseite)">Banner &#9432;</th>
+    <th class="right" style="color:#0891b2" title="banner_click: HTML-Overlay-Formate (Interstitial, E-Paper-Banner, Rätselseite) – nur für Kunden mit gebuchtem Banner-Produkt (viavox, Wietzendorf Touristik, Haenel, Olaf Meyer)">Banner &#9432;</th>
     <th class="right bz" title="Klicks aus der Böhme-Zeitung (dimension2=boehmzeitung)">davon BZ</th>
     <th class="right hk" title="Klicks aus dem Heide-Kurier (dimension2=heidekurier)">davon HK</th>
     <th class="right center">Anteil</th>
@@ -598,6 +607,7 @@ def generate_customer_html(adv, clicks):
     total    = clicks.get("total", 0)
     klickbar = clicks.get("klickbar", 0)
     banner   = clicks.get("banner", 0)
+    has_banner_product = adv.get("banner", False)
     bz_raw   = clicks.get("bz")   # None wenn Batch nicht verfügbar
     hk_raw   = clicks.get("hk")   # None wenn Batch nicht verfügbar
     split_available = bz_raw is not None and hk_raw is not None
@@ -632,6 +642,34 @@ def generate_customer_html(adv, clicks):
         pub_val_bz = pub_val_hk = pub_val_mag = "&ndash;"
         pub_pct_bz = pub_pct_hk = pub_pct_mag = ""
 
+    # KPI-Block und Format-Split für Banner nur wenn Banner-Produkt gebucht
+    if has_banner_product:
+        kpi_grid_cols = "repeat(3,1fr)"
+        banner_kpi_block = f"""  <div class="kpi">
+    <div class="kpi-label">Banner / Interstitial</div>
+    <div class="kpi-value" style="color:#0891b2">{banner:,}</div>
+    <div class="kpi-sub">banner_click</div>
+  </div>"""
+        format_split_section = f"""<div class="section">
+  <div class="section-title">Verteilung nach Anzeigenformat</div>
+  <div class="split-row">
+    <div class="split-label">Klickbare Anzeige</div>
+    <div class="split-bar">{bar(klickbar, max(klickbar, banner, 1), "#6366f1")}</div>
+    <div class="split-val">{klickbar:,}</div>
+    <div class="split-pct">{pct(klickbar)}&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Banner / Interstitial</div>
+    <div class="split-bar">{bar(banner, max(klickbar, banner, 1), "#0891b2")}</div>
+    <div class="split-val">{banner:,}</div>
+    <div class="split-pct">{pct(banner)}&thinsp;%</div>
+  </div>
+</div>"""
+    else:
+        kpi_grid_cols = "repeat(2,1fr)"
+        banner_kpi_block = ""
+        format_split_section = ""
+
     return f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -647,7 +685,7 @@ def generate_customer_html(adv, clicks):
   .logo-sub  {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }}
   h1 {{ font-size:20px; font-weight:700; margin-bottom:4px; }}
   .subtitle {{ font-size:12px; color:#6b7280; margin-bottom:24px; }}
-  .kpi-grid {{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }}
+  .kpi-grid {{ display:grid; grid-template-columns:{kpi_grid_cols}; gap:12px; margin-bottom:28px; }}
   .kpi {{ border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }}
   .kpi-label {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }}
   .kpi-value {{ font-size:26px; font-weight:800; }}
@@ -695,11 +733,7 @@ def generate_customer_html(adv, clicks):
     <div class="kpi-value" style="color:#6366f1">{klickbar:,}</div>
     <div class="kpi-sub">replica_box_link_click</div>
   </div>
-  <div class="kpi">
-    <div class="kpi-label">Banner / Interstitial</div>
-    <div class="kpi-value" style="color:#0891b2">{banner:,}</div>
-    <div class="kpi-sub">banner_click</div>
-  </div>
+{banner_kpi_block}
 </div>
 
 <div class="section">
@@ -726,20 +760,7 @@ def generate_customer_html(adv, clicks):
 </div>
 
 <div class="section">
-  <div class="section-title">Verteilung nach Anzeigenformat</div>
-  <div class="split-row">
-    <div class="split-label">Klickbare Anzeige</div>
-    <div class="split-bar">{bar(klickbar, max(klickbar, banner, 1), "#6366f1")}</div>
-    <div class="split-val">{klickbar:,}</div>
-    <div class="split-pct">{pct(klickbar)}&thinsp;%</div>
-  </div>
-  <div class="split-row">
-    <div class="split-label">Banner / Interstitial</div>
-    <div class="split-bar">{bar(banner, max(klickbar, banner, 1), "#0891b2")}</div>
-    <div class="split-val">{banner:,}</div>
-    <div class="split-pct">{pct(banner)}&thinsp;%</div>
-  </div>
-</div>
+{format_split_section}
 
 <div class="note">
   Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 
