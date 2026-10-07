@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klick-Bericht – bundeswehr</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 720px; margin: 0 auto; }
+  .logo-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; border-bottom:2px solid #e4e7ec; padding-bottom:14px; }
+  .logo-text { font-size:15px; font-weight:700; color:#1e40af; letter-spacing:-.01em; }
+  .logo-sub  { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }
+  h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
+  .subtitle { font-size:12px; color:#6b7280; margin-bottom:24px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
+  .kpi { border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }
+  .kpi-label { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .kpi-value { font-size:26px; font-weight:800; }
+  .kpi-sub   { font-size:10px; color:#9ca3af; margin-top:2px; }
+  .section { margin-bottom:24px; }
+  .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+                    color:#6b7280; border-bottom:1px solid #e4e7ec; padding-bottom:6px; margin-bottom:12px; }
+  .split-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .split-label { width:120px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .split-bar   { flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }
+  .split-val   { width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }
+  .split-pct   { width:36px; text-align:right; font-size:11px; color:#9ca3af; }
+  .note { background:#f0f9ff; border-left:3px solid #0ea5e9; padding:10px 14px;
+           font-size:11px; color:#0c4a6e; border-radius:0 6px 6px 0; margin-bottom:20px; }
+  footer { margin-top:30px; padding-top:10px; border-top:1px solid #e4e7ec;
+            font-size:10px; color:#9ca3af; line-height:1.6; }
+  .print-btn { display:inline-block; margin-bottom:18px; padding:8px 18px; background:#1d4ed8;
+               color:#fff; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
+               border:none; text-decoration:none; }
+  @media print { .print-btn { display:none; } @page { margin:14mm 16mm; size:A4; } }
+</style>
+</head>
+<body>
+
+<div class="logo-bar">
+  <div>
+    <div class="logo-text">Böhme-Zeitung / Heide-Kurier</div>
+    <div class="logo-sub">Prenly E-Paper &middot; Online-Werbung</div>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
+
+<h1>Klick-Bericht: bundeswehr</h1>
+<p class="subtitle">Zeitraum: 01.07.2026 – 07.10.2026 &middot; Ziel-URL: bewerbung.bundeswehr-karriere.de &middot; Stand: 07.10.2026</p>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-label">Klicks gesamt</div>
+    <div class="kpi-value">70</div>
+    <div class="kpi-sub">seit 01.07.2026</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Klickbare Anzeige</div>
+    <div class="kpi-value" style="color:#6366f1">65</div>
+    <div class="kpi-sub">replica_box_link_click</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Banner / Interstitial</div>
+    <div class="kpi-value" style="color:#0891b2">5</div>
+    <div class="kpi-sub">banner_click</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Verteilung nach Publikation</div>
+  <div class="split-row">
+    <div class="split-label">Böhme-Zeitung</div>
+    <div class="split-bar"><div style="background:#1d4ed8;height:12px;border-radius:3px;width:0%;min-width:2px"></div></div>
+    <div class="split-val">0</div>
+    <div class="split-pct">0&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Heide-Kurier</div>
+    <div class="split-bar"><div style="background:#16a34a;height:12px;border-radius:3px;width:0%;min-width:2px"></div></div>
+    <div class="split-val">0</div>
+    <div class="split-pct">0&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Magazin</div>
+    <div class="split-bar"><div style="background:#9ca3af;height:12px;border-radius:3px;width:100%;min-width:2px"></div></div>
+    <div class="split-val">70</div>
+    <div class="split-pct">100&thinsp;%</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Verteilung nach Anzeigenformat</div>
+  <div class="split-row">
+    <div class="split-label">Klickbare Anzeige</div>
+    <div class="split-bar"><div style="background:#6366f1;height:12px;border-radius:3px;width:100%;min-width:2px"></div></div>
+    <div class="split-val">65</div>
+    <div class="split-pct">93&thinsp;%</div>
+  </div>
+  <div class="split-row">
+    <div class="split-label">Banner / Interstitial</div>
+    <div class="split-bar"><div style="background:#0891b2;height:12px;border-radius:3px;width:8%;min-width:2px"></div></div>
+    <div class="split-val">5</div>
+    <div class="split-pct">7&thinsp;%</div>
+  </div>
+</div>
+
+<div class="note">
+  Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 
+  Erfasst werden ausschlie&szlig;lich Interaktionen im Prenly-E-Paper der 
+  B&ouml;hme-Zeitung und des Heide-Kuriers. Der Bericht wird t&auml;glich automatisch aktualisiert.
+</div>
+
+<footer>
+  B&ouml;hme-Zeitung / Heide-Kurier &middot; Prenly E-Paper &middot;
+  Generiert am 07.10.2026 &middot; matomo.mundschenk.de &middot; Site ID 14
+</footer>
+
+</body>
+</html>
