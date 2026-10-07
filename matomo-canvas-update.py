@@ -194,13 +194,16 @@ def fetch_bz_hk_batch():
 
 
 def compute_bz_hk_split(total, adv, bz_hits, hk_hits):
-    """Berechnet BZ/HK-Split per Ratio aus Batch-Daten."""
+    """Berechnet BZ/HK-Split per Ratio aus Batch-Daten.
+    Gibt bz=None, hk=None zurück wenn Batch-Daten nicht verfügbar (bz_hits is None)."""
+    if bz_hits is None or hk_hits is None:
+        return {"total": total, "bz": None, "hk": None}
     url_key = adv["url"]
     bz = sum(v for k, v in bz_hits.items() if url_key in k)
     hk = sum(v for k, v in hk_hits.items() if url_key in k)
     denom = bz + hk
     if denom == 0:
-        return {"total": total, "bz": 0, "hk": 0}
+        return {"total": total, "bz": None, "hk": None}
     return {
         "total": total,
         "bz": round(total * bz / denom),
@@ -220,6 +223,20 @@ def generate_html(daily, monthly, adv_clicks):
     ident_clicks = sum(adv_clicks.get(a["key"], {}).get("total", 0) for a in ADVERTISERS)
     avg_ctr      = f"{(total_clicks / total_views * 100):.1f}" if total_views else "0.0"
 
+    # Ist BZ/HK-Split verfügbar? (alle Werte None → nicht verfügbar)
+    any_split = any(
+        adv_clicks.get(a["key"], {}).get("bz") is not None
+        for a in ADVERTISERS
+    )
+    bzhk_note = "" if any_split else (
+        '<div style="background:#fefce8;border-left:3px solid #ca8a04;padding:8px 12px;'
+        'font-size:11px;color:#713f12;border-radius:0 6px 6px 0;margin-bottom:12px">'
+        '<strong>BZ&nbsp;/&nbsp;HK-Aufteilung heute nicht verf&uuml;gbar.</strong> '
+        'Die Matomo-Batch-Abfrage war nicht erreichbar. Gesamt-, Klickbar- und Banner-Werte sind korrekt. '
+        'Die Aufteilung wird automatisch wieder angezeigt sobald der Server die Abfrage erlaubt.'
+        '</div>'
+    )
+
     sorted_adv = sorted(ADVERTISERS, key=lambda a: adv_clicks.get(a["key"], {}).get("total", 0), reverse=True)
 
     # Tabellen-Zeilen
@@ -235,6 +252,8 @@ def generate_html(daily, monthly, adv_clicks):
         utm_pill   = '<span class="pill pill-green">ja</span>'   if a["utm"]     else '<span class="pill pill-orange">nein</span>'
         klaer_pill = '<span class="pill pill-orange">klaeren</span>' if a["klaeren"] else '<span class="pill pill-green">aktiv</span>'
         bericht_url = f"berichte/{a['key']}.html"
+        bz_cell = f'<span style="color:#6b7280;font-style:italic">N/V</span>' if bz is None else f"{bz:,}"
+        hk_cell = f'<span style="color:#6b7280;font-style:italic">N/V</span>' if hk is None else f"{hk:,}"
         adv_rows_html += f"""
         <tr>
           <td><strong>{a["name"]}</strong><br><a href="{bericht_url}" style="font-size:10px;color:#6b7280">&#128196; Kundenbericht</a></td>
@@ -242,8 +261,8 @@ def generate_html(daily, monthly, adv_clicks):
           <td class="right"><strong>{k:,}</strong></td>
           <td class="right" style="color:#6366f1">{klickbar:,}</td>
           <td class="right" style="color:#0891b2">{banner:,}</td>
-          <td class="right bz">{bz:,}</td>
-          <td class="right hk">{hk:,}</td>
+          <td class="right bz">{bz_cell}</td>
+          <td class="right hk">{hk_cell}</td>
           <td class="center">{share}&nbsp;%</td>
           <td class="center">{utm_pill}</td>
           <td class="center">{klaer_pill}</td>
@@ -349,14 +368,14 @@ Stand: {TODAY_DE} &middot; Zeitraum: 01.07.2026&ndash;{TODAY_DE} &middot; Automa
 </table>
 
 <h2>Werbekunden &ndash; Klicks kumuliert (01.07.2026&ndash;{TODAY_DE})</h2>
-<table>
+{bzhk_note}<table>
   <thead><tr>
     <th>Werbekunde</th><th>Ziel-URL</th>
     <th class="right">Klicks gesamt</th>
-    <th class="right" style="color:#6366f1">Klickbar</th>
-    <th class="right" style="color:#0891b2">Banner</th>
-    <th class="right bz">davon BZ</th>
-    <th class="right hk">davon HK</th>
+    <th class="right" style="color:#6366f1" title="replica_box_link_click: Klicks auf PDF-eingebettete Links (klickbare Anzeige)">Klickbar</th>
+    <th class="right" style="color:#0891b2" title="banner_click: HTML-Overlay-Formate (Interstitial, E-Paper-Banner, Rätselseite)">Banner &#9432;</th>
+    <th class="right bz" title="Klicks aus der Böhme-Zeitung (dimension2=boehmzeitung)">davon BZ</th>
+    <th class="right hk" title="Klicks aus dem Heide-Kurier (dimension2=heidekurier)">davon HK</th>
     <th class="right center">Anteil</th>
     <th class="center">UTM</th><th class="center">Status</th>
   </tr></thead>
@@ -431,7 +450,7 @@ def generate_canvas(daily, monthly, adv_clicks):
         for m in monthly
     )
     adv_rows = "\n  ".join(
-        f'{{ name: "{a["name"]}", url: "{a["url"]}", klicks: {adv_clicks.get(a["key"], {}).get("total", 0)}, bz: {adv_clicks.get(a["key"], {}).get("bz", 0)}, hk: {adv_clicks.get(a["key"], {}).get("hk", 0)}, utm: {js_bool(a["utm"])}, klaeren: {js_bool(a["klaeren"])} }},'
+        f'{{ name: "{a["name"]}", url: "{a["url"]}", klicks: {adv_clicks.get(a["key"], {}).get("total", 0)}, bz: {adv_clicks.get(a["key"], {}).get("bz") or "null"}, hk: {adv_clicks.get(a["key"], {}).get("hk") or "null"}, utm: {js_bool(a["utm"])}, klaeren: {js_bool(a["klaeren"])} }},'
         for a in ADVERTISERS
     )
 
@@ -579,9 +598,12 @@ def generate_customer_html(adv, clicks):
     total    = clicks.get("total", 0)
     klickbar = clicks.get("klickbar", 0)
     banner   = clicks.get("banner", 0)
-    bz       = clicks.get("bz", 0)
-    hk       = clicks.get("hk", 0)
-    mag      = max(0, total - bz - hk)
+    bz_raw   = clicks.get("bz")   # None wenn Batch nicht verfügbar
+    hk_raw   = clicks.get("hk")   # None wenn Batch nicht verfügbar
+    split_available = bz_raw is not None and hk_raw is not None
+    bz       = bz_raw if split_available else 0
+    hk       = hk_raw if split_available else 0
+    mag      = max(0, total - bz - hk) if split_available else 0
 
     def pct(v):
         return f"{(v / total * 100):.0f}" if total else "–"
@@ -591,6 +613,24 @@ def generate_customer_html(adv, clicks):
         return f'<div style="background:{color};height:12px;border-radius:3px;width:{w}%;min-width:2px"></div>'
 
     max_pub = max(bz, hk, mag, 1)
+
+    # Pre-computed Ausgabewerte für den Publikations-Split
+    if split_available:
+        pub_unavail_note = ""
+        pub_bar_bz  = bar(bz,  max_pub, "#1d4ed8")
+        pub_bar_hk  = bar(hk,  max_pub, "#16a34a")
+        pub_bar_mag = bar(mag, max_pub, "#9ca3af")
+        pub_val_bz  = f"{bz:,}"
+        pub_val_hk  = f"{hk:,}"
+        pub_val_mag = f"{mag:,}"
+        pub_pct_bz  = f"{pct(bz)}&thinsp;%"
+        pub_pct_hk  = f"{pct(hk)}&thinsp;%"
+        pub_pct_mag = f"{pct(mag)}&thinsp;%"
+    else:
+        pub_unavail_note = '<div class="note" style="margin-bottom:12px">Aufteilung BZ&nbsp;/&nbsp;HK aktuell nicht verf&uuml;gbar (Matomo-Server-Einschr&auml;nkung). Gesamt-Klicks sind korrekt.</div>'
+        pub_bar_bz = pub_bar_hk = pub_bar_mag = ""
+        pub_val_bz = pub_val_hk = pub_val_mag = "&ndash;"
+        pub_pct_bz = pub_pct_hk = pub_pct_mag = ""
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -664,23 +704,24 @@ def generate_customer_html(adv, clicks):
 
 <div class="section">
   <div class="section-title">Verteilung nach Publikation</div>
+  {pub_unavail_note}
   <div class="split-row">
     <div class="split-label">Böhme-Zeitung</div>
-    <div class="split-bar">{bar(bz, max_pub, "#1d4ed8")}</div>
-    <div class="split-val">{bz:,}</div>
-    <div class="split-pct">{pct(bz)}&thinsp;%</div>
+    <div class="split-bar">{pub_bar_bz}</div>
+    <div class="split-val">{pub_val_bz}</div>
+    <div class="split-pct">{pub_pct_bz}</div>
   </div>
   <div class="split-row">
     <div class="split-label">Heide-Kurier</div>
-    <div class="split-bar">{bar(hk, max_pub, "#16a34a")}</div>
-    <div class="split-val">{hk:,}</div>
-    <div class="split-pct">{pct(hk)}&thinsp;%</div>
+    <div class="split-bar">{pub_bar_hk}</div>
+    <div class="split-val">{pub_val_hk}</div>
+    <div class="split-pct">{pub_pct_hk}</div>
   </div>
   <div class="split-row">
     <div class="split-label">Magazin</div>
-    <div class="split-bar">{bar(mag, max_pub, "#9ca3af")}</div>
-    <div class="split-val">{mag:,}</div>
-    <div class="split-pct">{pct(mag)}&thinsp;%</div>
+    <div class="split-bar">{pub_bar_mag}</div>
+    <div class="split-val">{pub_val_mag}</div>
+    <div class="split-pct">{pub_pct_mag}</div>
   </div>
 </div>
 
@@ -757,7 +798,7 @@ def main():
             log(f"  BZ-URLs: {len(bz_hits)}, HK-URLs: {len(hk_hits)}")
         except Exception as e:
             log(f"  BZ/HK-Split nicht verfügbar ({e}) – fahre ohne Split fort")
-            bz_hits, hk_hits = {}, {}
+            bz_hits, hk_hits = None, None  # None = Signal "nicht verfügbar" (nicht "0")
 
         adv_clicks = {}
         for a in ADVERTISERS:
