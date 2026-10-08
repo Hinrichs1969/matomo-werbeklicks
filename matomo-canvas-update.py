@@ -13,6 +13,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import os
 TOKEN    = os.environ.get("MATOMO_TOKEN", "")
+PIPEDRIVE_TOKEN  = os.environ.get("PIPEDRIVE_API_TOKEN", "")
+PIPEDRIVE_FILTER = 38534   # OKR-Periode gewonnene Deals
 SITE_ID  = 14
 BASE_URL = "https://matomo.mundschenk.de/index.php"
 START    = "2026-07-01"
@@ -31,44 +33,44 @@ ADVERTISERS = [
     # pub: "BZ" | "HK" | "both"  – aus Pipedrive-Ausgabe-Feld (Stand Okt 2026)
     # "BZ" = Böhme-Zeitung (Ausgabe 470/2507), "HK" = Heide-Kurier (2463),
     # "both" = Cross-Selling / beide Ausgaben → BZ/HK-Split nicht berechenbar
-    {"key": "viavox",         "pub": "BZ",   "name": "viavox.io",                    "url": "viavox.io",                      "seg": "dimension14%3D%40viavox.io",                                                                                                                                                                        "utm": True,  "klaeren": False, "banner": True},
-    {"key": "vitamin_k4",     "pub": "BZ",   "name": "vitamin-k4.de",                "url": "vitamin-k4.de",                  "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.vitamin-k4.de",                                                                                                                                                  "utm": False, "klaeren": False},
-    {"key": "smurfitkappa",   "pub": "BZ",   "name": "smurfitkappa",                 "url": "smurfitkappa.concludis.de",      "seg": "dimension14%3D%3Dhttps%3A%2F%2Fsmurfitkappa.concludis.de%2Fprj%2Fshw%2F643fb86c8172fb56d8898497eb682c27_0%2F13796%2F%3Futm_campaign%3Dsmurfitkappa",                                                "utm": True,  "klaeren": False},
-    {"key": "harbort",        "pub": "BZ",   "name": "Harbort GmbH & Co. KG",        "url": "harbort.de/karriere",            "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.harbort.de%2Fkarriere%3Futm_campaign%3Dharbort",                                                                                                                "utm": True,  "klaeren": False},
-    {"key": "hotel_park",     "pub": "BZ",   "name": "hotel-park-soltau",            "url": "hotel-park-soltau.de",           "seg": "dimension14%3D%3Dhttps%3A%2F%2Fhotel-park-soltau.de%2Faktuellestellenangebote%2F%3Futm_campaign%3Dhotel-park-soltau",                                                                               "utm": True,  "klaeren": False},
-    {"key": "stadt_munster",  "pub": "both", "name": "stadt_munster",                "url": "bewerbung.munster.de",           "seg": "dimension14%3D%40bewerbung.munster.de",                                                                                                                                                            "utm": True,  "klaeren": False},
-    {"key": "stadt_walsrode", "pub": "BZ",   "name": "stadt-walsrode",               "url": "stadt-walsrode.de/Jobs",         "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.stadt-walsrode.de%2FStadt-Rathaus%2FPolitik-Verwaltung%2FJobs-Die-Stadt-als-Arbeitgeber%2F%3Futm_campaign%3Dstadt-walsrode",                                      "utm": True,  "klaeren": False},
-    {"key": "buergerliste",   "pub": "HK",   "name": "bispinger-buergerliste",       "url": "bispinger-buergerliste.de",      "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.bispinger-buergerliste.de%3Futm_campaign%3Dbuergerliste",                                                                                                        "utm": True,  "klaeren": False},
-    {"key": "wietzendorf",    "pub": "BZ",   "name": "Wietzendorf Ausbildung",       "url": "wietzendorf.de/ausbildung",      "seg": "dimension14%3D%40wietzendorf.de%2Fausbildung",                                                                                                                            "utm": True,  "klaeren": False},
-    {"key": "stadtwerke_mb",  "pub": "HK",   "name": "stadtwerke-munster-bispingen", "url": "ihr-stadtwerk.de",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.ihr-stadtwerk.de%2Fde%2FMenue%2FKarriere%2F%3Futm_campaign%3DStadtwerke-Munster-Bispingen-GmbH",                                                               "utm": True,  "klaeren": False},
-    {"key": "landesforsten",  "pub": "HK",   "name": "niedersaechs.-landesforsten",  "url": "landesforsten.de",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.landesforsten.de%2F%3Futm_campaign%3Dniedersaechsische-landesforsten",                                                                                          "utm": True,  "klaeren": False},
-    {"key": "bundeswehr",     "pub": "HK",   "name": "bundeswehr",                   "url": "bewerbung.bundeswehr-karriere.de","seg": "dimension14%3D%3Dhttps%3A%2F%2Fbewerbung.bundeswehr-karriere.de%2F%3Futm_campaign%3Dbundeswehr",                                                                                                  "utm": True,  "klaeren": False},
-    {"key": "spd",            "pub": "HK",   "name": "SPD Schneverdingen",           "url": "spd-heidekreis.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.spd-heidekreis.de%2Fwahlen-2026%2F%3Futm_campaign%3DSPD",                                                                                                      "utm": True,  "klaeren": False},
-    {"key": "sushi",          "pub": "HK",   "name": "Sushi Bar Soltau",             "url": "sushi-soltau.de",                "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.sushi-soltau.de%2F%3Futm_campaign%3DSushiBar",                                                                                                                  "utm": True,  "klaeren": False},
-    {"key": "grillhus",       "pub": "HK",   "name": "Grillhus",                     "url": "grillhus.de/jobs",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fgrillhus.de%2Fjobs%2F%3Futm_campaign%3Dgrillhus",                                                                                                                  "utm": True,  "klaeren": False},
-    {"key": "maderos",        "pub": "BZ",   "name": "Maderos",                      "url": "maderos.de",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.maderos.de%3Futm_campaign%3Dmaderos",                                                                                                                          "utm": True,  "klaeren": False},
-    {"key": "hatesohl",       "pub": "BZ",   "name": "Bestattungen Hatesohl",        "url": "bestattungen-hatesohl.de",       "seg": "dimension14%3D%40bestattungen-hatesohl.de",                                                                                                                            "utm": True,  "klaeren": False},
-    {"key": "nelsonpark",     "pub": "HK",   "name": "Nelson Park Terrassen",         "url": "nelsonpark",                     "seg": "dimension14%3D%40nelsonpark",                                                                                                                                                                  "utm": True,  "klaeren": False},
-    {"key": "workandlife",    "pub": "both", "name": "Work & Life Heidekreis",        "url": "workandlife-heidekreis.de",      "seg": "dimension14%3D%40workandlife-heidekreis.de",                                                                                                                                                    "utm": True,  "klaeren": False},
-    {"key": "schneverdingen", "pub": "BZ",   "name": "Stadt Schneverdingen",          "url": "schneverdingen.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.schneverdingen.de%2Fdesktopdefault.aspx%2Ftabid-7207%2F%3Futm_campaign%3Dstadt_schneverdingen",                                                              "utm": True,  "klaeren": False},
-    {"key": "lorenzdental",   "pub": "BZ",   "name": "Lorenz Dental Soltau",          "url": "karriere-lorenzdental-soltau.de","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.karriere-lorenzdental-soltau.de%2F%3Futm_campaign%3Dlorenzdental",                                                                                        "utm": True,  "klaeren": False},
-    {"key": "haenel",         "pub": "BZ",   "name": "Haenel Kachelofenbau",          "url": "haenel-kachelofenbau.de",        "seg": "dimension14%3D%40haenel-kachelofenbau.de",                                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
-    {"key": "suedsee",        "pub": "HK",   "name": "Südsee-Camp",                   "url": "suedsee-camp.de",                "seg": "dimension14%3D%40suedsee-camp.de",                                                                                                                                                             "utm": True,  "klaeren": False},
-    {"key": "roeders",        "pub": "BZ",   "name": "Gebrüder Röders",               "url": "gebrueder-roeders.com/karriere", "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.gebrueder-roeders.com%2Fkarriere%2Fausbildung-studium%2F%3Futm_campaign%3Dgebrueder-roeders",                                                                    "utm": True,  "klaeren": False},
-    {"key": "nossol",         "pub": "BZ",   "name": "Nossol",                        "url": "nossol.org",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fnossol.org%2F%3Futm_campaign%3Dnossol",                                                                                                 "utm": True,  "klaeren": False},
-    {"key": "drk_munster",    "pub": "BZ",   "name": "DRK Alten-/Pflegeheim Munster", "url": "drk-munster.de/freie-stellen",   "seg": "dimension14%3D%40drk-munster.de%2Ffreie-stellen",                                                                                                                               "utm": True,  "klaeren": False},
-    {"key": "schroeder",      "pub": "BZ",   "name": "Otto Schröder Tiefbau",          "url": "schroeder-tiefbau.de/unternehmen","seg": "dimension14%3D%40schroeder-tiefbau.de%2Funternehmen",                                                                                                                                    "utm": True,  "klaeren": False},
-    {"key": "edeka_meyer",    "pub": "BZ",   "name": "Edeka Meyer Neuenkirchen",       "url": "edeka-meyer-neuenkirchen.de/karriere","seg": "dimension14%3D%40edeka-meyer-neuenkirchen.de%2Fkarriere",                                                                                                                           "utm": True,  "klaeren": False},
-    {"key": "klinik_fb",      "pub": "BZ",   "name": "Klinik Fallingbostel",           "url": "klinik-fallingbostel.de/karriere","seg": "dimension14%3D%40klinik-fallingbostel.de%2Fkarriere",                                                                                                                                    "utm": False, "klaeren": False},
-    {"key": "wtz_touristik",  "pub": "both", "name": "Wietzendorf Touristik (Honigfest)","url": "wietzendorf-touristik.de",     "seg": "dimension14%3D%40wietzendorf-touristik.de",                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
-    {"key": "covestro",       "pub": "BZ",   "name": "Covestro",                       "url": "covestro.com/de/career",         "seg": "dimension14%3D%40covestro.com%2Fde%2Fcareer",                                                                                                                                            "utm": True,  "klaeren": False},
-    {"key": "pflegejobs",     "pub": "BZ",   "name": "CMS / Pflegejobs",               "url": "pflegejobs-altenpflege.de/azubi","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.pflegejobs-altenpflege.de%2Fazubi-pflegefachfrau-mann-w-m-d%2F%3Futm_campaign%3DHaus_Zuflucht",                                                      "utm": True,  "klaeren": False},
+    {"key": "viavox",         "pub": "BZ", "pipedrive_org_id": 16659,   "name": "viavox.io",                    "url": "viavox.io",                      "seg": "dimension14%3D%40viavox.io",                                                                                                                                                                        "utm": True,  "klaeren": False, "banner": True},
+    {"key": "vitamin_k4",     "pub": "BZ", "pipedrive_org_id": None,   "name": "vitamin-k4.de",                "url": "vitamin-k4.de",                  "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.vitamin-k4.de",                                                                                                                                                  "utm": False, "klaeren": False},
+    {"key": "smurfitkappa",   "pub": "BZ", "pipedrive_org_id": 11882,   "name": "smurfitkappa",                 "url": "smurfitkappa.concludis.de",      "seg": "dimension14%3D%3Dhttps%3A%2F%2Fsmurfitkappa.concludis.de%2Fprj%2Fshw%2F643fb86c8172fb56d8898497eb682c27_0%2F13796%2F%3Futm_campaign%3Dsmurfitkappa",                                                "utm": True,  "klaeren": False},
+    {"key": "harbort",        "pub": "BZ", "pipedrive_org_id": 10746,   "name": "Harbort GmbH & Co. KG",        "url": "harbort.de/karriere",            "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.harbort.de%2Fkarriere%3Futm_campaign%3Dharbort",                                                                                                                "utm": True,  "klaeren": False},
+    {"key": "hotel_park",     "pub": "BZ", "pipedrive_org_id": None,   "name": "hotel-park-soltau",            "url": "hotel-park-soltau.de",           "seg": "dimension14%3D%3Dhttps%3A%2F%2Fhotel-park-soltau.de%2Faktuellestellenangebote%2F%3Futm_campaign%3Dhotel-park-soltau",                                                                               "utm": True,  "klaeren": False},
+    {"key": "stadt_munster",  "pub": "both", "pipedrive_org_id": 13901, "name": "stadt_munster",                "url": "bewerbung.munster.de",           "seg": "dimension14%3D%40bewerbung.munster.de",                                                                                                                                                            "utm": True,  "klaeren": False},
+    {"key": "stadt_walsrode", "pub": "BZ", "pipedrive_org_id": 11644,   "name": "stadt-walsrode",               "url": "stadt-walsrode.de/Jobs",         "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.stadt-walsrode.de%2FStadt-Rathaus%2FPolitik-Verwaltung%2FJobs-Die-Stadt-als-Arbeitgeber%2F%3Futm_campaign%3Dstadt-walsrode",                                      "utm": True,  "klaeren": False},
+    {"key": "buergerliste",   "pub": "HK", "pipedrive_org_id": 18942,   "name": "bispinger-buergerliste",       "url": "bispinger-buergerliste.de",      "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.bispinger-buergerliste.de%3Futm_campaign%3Dbuergerliste",                                                                                                        "utm": True,  "klaeren": False},
+    {"key": "wietzendorf",    "pub": "BZ", "pipedrive_org_id": 13502,   "name": "Wietzendorf Ausbildung",       "url": "wietzendorf.de/ausbildung",      "seg": "dimension14%3D%40wietzendorf.de%2Fausbildung",                                                                                                                            "utm": True,  "klaeren": False},
+    {"key": "stadtwerke_mb",  "pub": "HK", "pipedrive_org_id": 11934,   "name": "stadtwerke-munster-bispingen", "url": "ihr-stadtwerk.de",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.ihr-stadtwerk.de%2Fde%2FMenue%2FKarriere%2F%3Futm_campaign%3DStadtwerke-Munster-Bispingen-GmbH",                                                               "utm": True,  "klaeren": False},
+    {"key": "landesforsten",  "pub": "HK", "pipedrive_org_id": 11478,   "name": "niedersaechs.-landesforsten",  "url": "landesforsten.de",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.landesforsten.de%2F%3Futm_campaign%3Dniedersaechsische-landesforsten",                                                                                          "utm": True,  "klaeren": False},
+    {"key": "bundeswehr",     "pub": "HK", "pipedrive_org_id": 16397,   "name": "bundeswehr",                   "url": "bewerbung.bundeswehr-karriere.de","seg": "dimension14%3D%3Dhttps%3A%2F%2Fbewerbung.bundeswehr-karriere.de%2F%3Futm_campaign%3Dbundeswehr",                                                                                                  "utm": True,  "klaeren": False},
+    {"key": "spd",            "pub": "HK", "pipedrive_org_id": 16337,   "name": "SPD Schneverdingen",           "url": "spd-heidekreis.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.spd-heidekreis.de%2Fwahlen-2026%2F%3Futm_campaign%3DSPD",                                                                                                      "utm": True,  "klaeren": False},
+    {"key": "sushi",          "pub": "HK", "pipedrive_org_id": 17895,   "name": "Sushi Bar Soltau",             "url": "sushi-soltau.de",                "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.sushi-soltau.de%2F%3Futm_campaign%3DSushiBar",                                                                                                                  "utm": True,  "klaeren": False},
+    {"key": "grillhus",       "pub": "HK", "pipedrive_org_id": None,   "name": "Grillhus",                     "url": "grillhus.de/jobs",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fgrillhus.de%2Fjobs%2F%3Futm_campaign%3Dgrillhus",                                                                                                                  "utm": True,  "klaeren": False},
+    {"key": "maderos",        "pub": "BZ", "pipedrive_org_id": None,   "name": "Maderos",                      "url": "maderos.de",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.maderos.de%3Futm_campaign%3Dmaderos",                                                                                                                          "utm": True,  "klaeren": False},
+    {"key": "hatesohl",       "pub": "BZ", "pipedrive_org_id": 12082,   "name": "Bestattungen Hatesohl",        "url": "bestattungen-hatesohl.de",       "seg": "dimension14%3D%40bestattungen-hatesohl.de",                                                                                                                            "utm": True,  "klaeren": False},
+    {"key": "nelsonpark",     "pub": "HK", "pipedrive_org_id": 15085,   "name": "Nelson Park Terrassen",         "url": "nelsonpark",                     "seg": "dimension14%3D%40nelsonpark",                                                                                                                                                                  "utm": True,  "klaeren": False},
+    {"key": "workandlife",    "pub": "both", "pipedrive_org_id": None, "name": "Work & Life Heidekreis",        "url": "workandlife-heidekreis.de",      "seg": "dimension14%3D%40workandlife-heidekreis.de",                                                                                                                                                    "utm": True,  "klaeren": False},
+    {"key": "schneverdingen", "pub": "BZ", "pipedrive_org_id": 2572,   "name": "Stadt Schneverdingen",          "url": "schneverdingen.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.schneverdingen.de%2Fdesktopdefault.aspx%2Ftabid-7207%2F%3Futm_campaign%3Dstadt_schneverdingen",                                                              "utm": True,  "klaeren": False},
+    {"key": "lorenzdental",   "pub": "BZ", "pipedrive_org_id": 2998,   "name": "Lorenz Dental Soltau",          "url": "karriere-lorenzdental-soltau.de","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.karriere-lorenzdental-soltau.de%2F%3Futm_campaign%3Dlorenzdental",                                                                                        "utm": True,  "klaeren": False},
+    {"key": "haenel",         "pub": "BZ", "pipedrive_org_id": 13241,   "name": "Haenel Kachelofenbau",          "url": "haenel-kachelofenbau.de",        "seg": "dimension14%3D%40haenel-kachelofenbau.de",                                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
+    {"key": "suedsee",        "pub": "HK", "pipedrive_org_id": 2787,   "name": "Südsee-Camp",                   "url": "suedsee-camp.de",                "seg": "dimension14%3D%40suedsee-camp.de",                                                                                                                                                             "utm": True,  "klaeren": False},
+    {"key": "roeders",        "pub": "BZ", "pipedrive_org_id": 10648,   "name": "Gebrüder Röders",               "url": "gebrueder-roeders.com/karriere", "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.gebrueder-roeders.com%2Fkarriere%2Fausbildung-studium%2F%3Futm_campaign%3Dgebrueder-roeders",                                                                    "utm": True,  "klaeren": False},
+    {"key": "nossol",         "pub": "BZ", "pipedrive_org_id": 3820,   "name": "Nossol",                        "url": "nossol.org",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fnossol.org%2F%3Futm_campaign%3Dnossol",                                                                                                 "utm": True,  "klaeren": False},
+    {"key": "drk_munster",    "pub": "BZ", "pipedrive_org_id": 15944,   "name": "DRK Alten-/Pflegeheim Munster", "url": "drk-munster.de/freie-stellen",   "seg": "dimension14%3D%40drk-munster.de%2Ffreie-stellen",                                                                                                                               "utm": True,  "klaeren": False},
+    {"key": "schroeder",      "pub": "BZ", "pipedrive_org_id": 1358,   "name": "Otto Schröder Tiefbau",          "url": "schroeder-tiefbau.de/unternehmen","seg": "dimension14%3D%40schroeder-tiefbau.de%2Funternehmen",                                                                                                                                    "utm": True,  "klaeren": False},
+    {"key": "edeka_meyer",    "pub": "BZ", "pipedrive_org_id": 10352,   "name": "Edeka Meyer Neuenkirchen",       "url": "edeka-meyer-neuenkirchen.de/karriere","seg": "dimension14%3D%40edeka-meyer-neuenkirchen.de%2Fkarriere",                                                                                                                           "utm": True,  "klaeren": False},
+    {"key": "klinik_fb",      "pub": "BZ", "pipedrive_org_id": 11129,   "name": "Klinik Fallingbostel",           "url": "klinik-fallingbostel.de/karriere","seg": "dimension14%3D%40klinik-fallingbostel.de%2Fkarriere",                                                                                                                                    "utm": False, "klaeren": False},
+    {"key": "wtz_touristik",  "pub": "both", "pipedrive_org_id": 17606, "name": "Wietzendorf Touristik (Honigfest)","url": "wietzendorf-touristik.de",     "seg": "dimension14%3D%40wietzendorf-touristik.de",                                                                                                                                     "utm": False, "klaeren": False, "banner": True},
+    {"key": "covestro",       "pub": "BZ", "pipedrive_org_id": 14967,   "name": "Covestro",                       "url": "covestro.com/de/career",         "seg": "dimension14%3D%40covestro.com%2Fde%2Fcareer",                                                                                                                                            "utm": True,  "klaeren": False},
+    {"key": "pflegejobs",     "pub": "BZ", "pipedrive_org_id": 10090,   "name": "CMS / Pflegejobs",               "url": "pflegejobs-altenpflege.de/azubi","seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.pflegejobs-altenpflege.de%2Fazubi-pflegefachfrau-mann-w-m-d%2F%3Futm_campaign%3DHaus_Zuflucht",                                                      "utm": True,  "klaeren": False},
     # Aus Pipedrive-Recherche Oktober 2026
-    {"key": "grube",          "pub": "both", "name": "Grube KG Forstgerätestelle",     "url": "grube.de/karriere/ausbildung",   "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.grube.de%2Fkarriere%2Fausbildung%2F",                                                                                                          "utm": False, "klaeren": False},
-    {"key": "kahnwald",       "pub": "HK",   "name": "Kahnwald Optik-Hörgeräte",       "url": "optikkahnwald.de",               "seg": "dimension14%3D%40optikkahnwald.de",                                                                                                                                             "utm": False, "klaeren": True },
-    {"key": "olaf_meyer",     "pub": "BZ",   "name": "Garten- u. Landschaftsbau Meyer","url": "meyer-gartenbau-soltau.de",      "seg": "dimension14%3D%40meyer-gartenbau-soltau.de",                                                                                                                                   "utm": False, "klaeren": True,  "banner": True },
-    {"key": "msm_walsrode",   "pub": "BZ",   "name": "MSM Walsrode",                   "url": "msm-walsrode.com",               "seg": "dimension14%3D%40msm-walsrode.com",                                                                                                                                             "utm": False, "klaeren": True },
-    {"key": "heidekreis",     "pub": "BZ",   "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
+    {"key": "grube",          "pub": "both", "pipedrive_org_id": 89, "name": "Grube KG Forstgerätestelle",     "url": "grube.de/karriere/ausbildung",   "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.grube.de%2Fkarriere%2Fausbildung%2F",                                                                                                          "utm": False, "klaeren": False},
+    {"key": "kahnwald",       "pub": "HK", "pipedrive_org_id": 11092,   "name": "Kahnwald Optik-Hörgeräte",       "url": "optikkahnwald.de",               "seg": "dimension14%3D%40optikkahnwald.de",                                                                                                                                             "utm": False, "klaeren": True },
+    {"key": "olaf_meyer",     "pub": "BZ", "pipedrive_org_id": 3453,   "name": "Garten- u. Landschaftsbau Meyer","url": "meyer-gartenbau-soltau.de",      "seg": "dimension14%3D%40meyer-gartenbau-soltau.de",                                                                                                                                   "utm": False, "klaeren": True,  "banner": True },
+    {"key": "msm_walsrode",   "pub": "BZ", "pipedrive_org_id": 18291,   "name": "MSM Walsrode",                   "url": "msm-walsrode.com",               "seg": "dimension14%3D%40msm-walsrode.com",                                                                                                                                             "utm": False, "klaeren": True },
+    {"key": "heidekreis",     "pub": "BZ", "pipedrive_org_id": 2489,   "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
 ]
 
 
@@ -180,6 +182,78 @@ def fetch_advertiser_clicks(adv):
             if n == "banner_click" and has_banner_product:
                 banner = int(e.get("nb_events", 0))
     return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
+
+
+
+def fetch_pipedrive_deals():
+    """Holt alle gewonnenen OKR-Deals aus Pipedrive, gruppiert nach Org-ID.
+    Filtert Vermittlungs- und Jobportal-Deals heraus.
+    Gibt dict {org_id: [{title, won, value, id}]} zurück."""
+    if not PIPEDRIVE_TOKEN:
+        log("  Pipedrive-Token nicht gesetzt – keine per-Deal-Daten")
+        return {}
+    url = (f"https://api.pipedrive.com/v1/deals"
+           f"?filter_id={PIPEDRIVE_FILTER}&status=won&limit=500"
+           f"&api_token={PIPEDRIVE_TOKEN}")
+    try:
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read())
+    except Exception as e:
+        log(f"  Pipedrive-Fehler: {e}")
+        return {}
+
+    AUSGABE_KEY  = "4a247ee0f4ed56f270ef471614b9121d2236f2ec"
+    SKIP_AUSGABEN = {"2462", "852"}   # Vermittlung, jobsfuerniedersachsen.de
+    SKIP_KW = ("jobsfuer", "nordh.wochenblatt", "rotenb", "landeszeitung",
+               "walsroder zeitung", "vermittlung")
+
+    by_org = {}
+    for d in (data.get("data") or []):
+        org = d.get("org_id")
+        if not isinstance(org, dict):
+            continue
+        org_id = org.get("value")
+        if not org_id:
+            continue
+        if str(d.get(AUSGABE_KEY) or "") in SKIP_AUSGABEN:
+            continue
+        title_lower = (d.get("title") or "").lower()
+        if any(kw in title_lower for kw in SKIP_KW):
+            continue
+        won = (d.get("won_time") or "")[:10]
+        if not won or won < START:
+            continue
+        if org_id not in by_org:
+            by_org[org_id] = []
+        by_org[org_id].append({
+            "title": d.get("title", ""),
+            "won":   won,
+            "value": float(d.get("value") or 0),
+            "id":    d.get("id"),
+        })
+    for oid in by_org:
+        by_org[oid].sort(key=lambda x: x["won"])
+    return by_org
+
+
+def fetch_deal_clicks(seg, date_from, date_to, has_banner):
+    """Klick-Events für einen Deal im angegebenen Zeitraum."""
+    raw = matomo_post({
+        "module": "API", "method": "Events.getName",
+        "period": "range", "date": f"{date_from},{date_to}",
+        "filter_limit": "20",
+        "segment": seg,
+    })
+    klickbar = banner = 0
+    if isinstance(raw, list):
+        for e in raw:
+            n = e.get("label", "")
+            if n == "replica_box_link_click":
+                klickbar = int(e.get("nb_events", 0))
+            if n == "banner_click" and has_banner:
+                banner = int(e.get("nb_events", 0))
+    return {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
 
 
 def compute_bz_hk_split(total, adv):
@@ -644,6 +718,57 @@ def generate_customer_html(adv, clicks):
         banner_kpi_block = ""
         format_split_section = ""
 
+    # ---- Deal-Tabelle (per-Anzeigen-Auswertung) ----
+    deals = clicks.get("deals", [])
+    if deals:
+        # CSS für Tabelle (wird nur einmal im Dokument benötigt, inline ist OK)
+        deals_rows = ""
+        for dr in deals:
+            dk = dr.get("klickbar", 0)
+            db = dr.get("banner", 0)
+            dt = dr.get("total", 0)
+            title_short = dr["title"][:55] + ("…" if len(dr["title"]) > 55 else "")
+            days = (datetime.datetime.strptime(dr["date_to"], "%Y-%m-%d") -
+                    datetime.datetime.strptime(dr["date_from"], "%Y-%m-%d")).days + 1
+            ctr_day = f"{dt/days:.1f}" if days > 0 else "–"
+            banner_cell = f'<td style="text-align:right">{db:,}</td>' if has_banner_product else ""
+            deals_rows += f"""<tr>
+  <td>{title_short}</td>
+  <td style="text-align:center">{dr["won_de"]}</td>
+  <td style="text-align:center;color:#6b7280">{dr["date_from_de"]}–{dr["date_to_de"]}</td>
+  <td style="text-align:center;color:#6b7280">{days}&thinsp;Tage</td>
+  <td style="text-align:right;font-weight:600">{dt:,}</td>
+  <td style="text-align:right;color:#4b5563">{dk:,}</td>
+  {banner_cell}
+  <td style="text-align:right;color:#9ca3af">{ctr_day}</td>
+</tr>"""
+        banner_header = '<th style="text-align:right">Banner</th>' if has_banner_product else ""
+        deals_table_section = f"""<div class="section">
+  <div class="section-title">Klicks nach Anzeige &amp; Erscheinungsdatum</div>
+  <p style="font-size:10px;color:#9ca3af;margin-bottom:10px">
+    Der Zeitraum je Anzeige reicht vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
+    (bzw. heute f&uuml;r die letzte Anzeige). Grundlage: Pipedrive-Deals &amp; Matomo.
+  </p>
+  <table style="width:100%;border-collapse:collapse;font-size:11px">
+    <thead>
+      <tr style="border-bottom:2px solid #e4e7ec;text-align:left">
+        <th style="padding:4px 6px">Anzeige</th>
+        <th style="text-align:center;padding:4px 6px">Erschienen</th>
+        <th style="text-align:center;padding:4px 6px">Messzeitraum</th>
+        <th style="text-align:center;padding:4px 6px">Tage</th>
+        <th style="text-align:right;padding:4px 6px">Klicks</th>
+        <th style="text-align:right;padding:4px 6px">Klickbar</th>
+        {banner_header}
+        <th style="text-align:right;padding:4px 6px">&#216;/Tag</th>
+      </tr>
+    </thead>
+    <tbody style="border-bottom:1px solid #e4e7ec">
+{deals_rows}    </tbody>
+  </table>
+</div>"""
+    else:
+        deals_table_section = ""
+
     return f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -736,6 +861,8 @@ def generate_customer_html(adv, clicks):
 <div class="section">
 {format_split_section}
 
+{deals_table_section}
+
 <div class="note">
   Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 
   Erfasst werden ausschlie&szlig;lich Interaktionen im Prenly-E-Paper der 
@@ -778,20 +905,74 @@ def main():
         monthly = fetch_monthly_data()
         log(f"  {len(monthly)} Monate geladen")
 
-        log("Hole Werbekunden-Klicks (parallel)...")
+        log("Hole Pipedrive-Deals (für per-Anzeigen-Auswertung)...")
+        pipedrive_deals = fetch_pipedrive_deals()
+        log(f"  {sum(len(v) for v in pipedrive_deals.values())} E-Paper-Deals in {len(pipedrive_deals)} Orgs")
+
+        # Datumsbereiche je Deal berechnen
+        adv_deal_ranges = {}
+        for a in ADVERTISERS:
+            org_id = a.get("pipedrive_org_id")
+            deals = pipedrive_deals.get(org_id, []) if org_id else []
+            ranges = []
+            for i, deal in enumerate(deals):
+                date_from = deal["won"]
+                if i + 1 < len(deals):
+                    next_won = datetime.datetime.strptime(deals[i+1]["won"], "%Y-%m-%d")
+                    date_to = (next_won - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+                else:
+                    date_to = TODAY
+                if date_from > TODAY or date_from > date_to:
+                    continue  # Überlappende Buchungen gleichen Datums überspringen
+                ranges.append({
+                    "title":     deal["title"],
+                    "won":       deal["won"],
+                    "won_de":    datetime.datetime.strptime(deal["won"], "%Y-%m-%d").strftime("%d.%m.%Y"),
+                    "value":     deal["value"],
+                    "date_from": date_from,
+                    "date_to":   min(date_to, TODAY),
+                    "date_from_de": datetime.datetime.strptime(date_from, "%Y-%m-%d").strftime("%d.%m."),
+                    "date_to_de":   datetime.datetime.strptime(min(date_to, TODAY), "%Y-%m-%d").strftime("%d.%m.%Y"),
+                })
+            adv_deal_ranges[a["key"]] = ranges
+
+        log("Hole Werbekunden-Klicks (parallel: Gesamtzeitraum + per Deal)...")
         adv_clicks_raw = {}
-        with ThreadPoolExecutor(max_workers=3) as ex:
-            futures = {ex.submit(fetch_advertiser_clicks, a): a for a in ADVERTISERS}
-            for future in as_completed(futures):
-                key, data = future.result()
-                adv_clicks_raw[key] = data
-                log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']}")
+        deal_clicks_raw = {}  # key -> [{title, won, date_from/to, klickbar, banner, total}]
+
+        def fetch_adv_deal_clicks_all(a):
+            """Alle per-Deal-Klicks für einen Advertiser (sequenziell)."""
+            results = []
+            for dr in adv_deal_ranges.get(a["key"], []):
+                c = fetch_deal_clicks(a["seg"], dr["date_from"], dr["date_to"], a.get("banner", False))
+                results.append({**dr, **c})
+            return a["key"], results
+
+        with ThreadPoolExecutor(max_workers=5) as ex:
+            futures_total = {ex.submit(fetch_advertiser_clicks, a): ("total", a) for a in ADVERTISERS}
+            futures_deals = {ex.submit(fetch_adv_deal_clicks_all, a): ("deals", a)
+                             for a in ADVERTISERS if adv_deal_ranges.get(a["key"])}
+            for future in as_completed({**futures_total, **futures_deals}):
+                kind, a = ({**futures_total, **futures_deals})[future]
+                if kind == "total":
+                    key, data = future.result()
+                    adv_clicks_raw[key] = data
+                    log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']}")
+                else:
+                    key, results = future.result()
+                    deal_clicks_raw[key] = results
+                    log(f"  {key}: {len(results)} Deals mit Einzelklicks")
 
         adv_clicks = {}
         for a in ADVERTISERS:
             raw = adv_clicks_raw.get(a["key"], {"klickbar": 0, "banner": 0, "total": 0})
             split = compute_bz_hk_split(raw["total"], a)
-            adv_clicks[a["key"]] = {**raw, "bz": split["bz"], "hk": split["hk"]}
+            adv_clicks[a["key"]] = {
+                **raw,
+                "bz":    split["bz"],
+                "hk":    split["hk"],
+                "deals": deal_clicks_raw.get(a["key"], []),
+            }
             c = adv_clicks[a["key"]]
             log(f"  {a['key']}: gesamt={c['total']} klickbar={c['klickbar']} banner={c['banner']} BZ={c['bz']} HK={c['hk']}")
 
