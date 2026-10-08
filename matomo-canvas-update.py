@@ -82,7 +82,7 @@ def log(msg):
         f.write(line + "\n")
 
 
-def matomo_post(params, retries=3, backoff=120):
+def matomo_post(params, retries=3, backoff=15):
     p = dict(params)
     p["token_auth"] = TOKEN
     p["idSite"]     = str(SITE_ID)
@@ -203,7 +203,8 @@ def fetch_pipedrive_deals():
         log(f"  Pipedrive-Fehler: {e}")
         return {}
 
-    AUSGABE_KEY  = "4a247ee0f4ed56f270ef471614b9121d2236f2ec"
+    AUSGABE_KEY       = "4a247ee0f4ed56f270ef471614b9121d2236f2ec"
+    ERSCHEINUNGS_KEY  = "af960303282af79a7275b11c466837d11008cac6"
     SKIP_AUSGABEN = {"2462", "852"}   # Vermittlung, jobsfuerniedersachsen.de
     SKIP_KW = ("jobsfuer", "nordh.wochenblatt", "rotenb", "landeszeitung",
                "walsroder zeitung", "vermittlung")
@@ -221,19 +222,22 @@ def fetch_pipedrive_deals():
         title_lower = (d.get("title") or "").lower()
         if any(kw in title_lower for kw in SKIP_KW):
             continue
-        won = (d.get("won_time") or "")[:10]
-        if not won or won < START:
+        # Erscheinungsdatum bevorzugen; won_time als Fallback
+        datum = str(d.get(ERSCHEINUNGS_KEY) or "")[:10]
+        if not datum:
+            datum = (d.get("won_time") or "")[:10]
+        if not datum or datum < START:
             continue
         if org_id not in by_org:
             by_org[org_id] = []
         by_org[org_id].append({
             "title": d.get("title", ""),
-            "won":   won,
+            "datum": datum,   # Erscheinungsdatum (oder won_time als Fallback)
             "value": float(d.get("value") or 0),
             "id":    d.get("id"),
         })
     for oid in by_org:
-        by_org[oid].sort(key=lambda x: x["won"])
+        by_org[oid].sort(key=lambda x: x["datum"])
     return by_org
 
 
@@ -244,7 +248,7 @@ def fetch_deal_clicks(seg, date_from, date_to, has_banner):
         "period": "range", "date": f"{date_from},{date_to}",
         "filter_limit": "20",
         "segment": seg,
-    })
+    }, retries=1, backoff=5)
     klickbar = banner = 0
     if isinstance(raw, list):
         for e in raw:
@@ -734,7 +738,7 @@ def generate_customer_html(adv, clicks):
             banner_cell = f'<td style="text-align:right">{db:,}</td>' if has_banner_product else ""
             deals_rows += f"""<tr>
   <td>{title_short}</td>
-  <td style="text-align:center">{dr["won_de"]}</td>
+  <td style="text-align:center">{dr["datum_de"]}</td>
   <td style="text-align:center;color:#6b7280">{dr["date_from_de"]}–{dr["date_to_de"]}</td>
   <td style="text-align:center;color:#6b7280">{days}&thinsp;Tage</td>
   <td style="text-align:right;font-weight:600">{dt:,}</td>
@@ -916,21 +920,21 @@ def main():
             deals = pipedrive_deals.get(org_id, []) if org_id else []
             ranges = []
             for i, deal in enumerate(deals):
-                date_from = deal["won"]
+                date_from = deal["datum"]   # Erscheinungsdatum
                 if i + 1 < len(deals):
-                    next_won = datetime.datetime.strptime(deals[i+1]["won"], "%Y-%m-%d")
-                    date_to = (next_won - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+                    next_dt = datetime.datetime.strptime(deals[i+1]["datum"], "%Y-%m-%d")
+                    date_to = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
                 else:
                     date_to = TODAY
                 if date_from > TODAY or date_from > date_to:
-                    continue  # Überlappende Buchungen gleichen Datums überspringen
+                    continue  # überlappende oder zukünftige Erscheinungen überspringen
                 ranges.append({
-                    "title":     deal["title"],
-                    "won":       deal["won"],
-                    "won_de":    datetime.datetime.strptime(deal["won"], "%Y-%m-%d").strftime("%d.%m.%Y"),
-                    "value":     deal["value"],
-                    "date_from": date_from,
-                    "date_to":   min(date_to, TODAY),
+                    "title":        deal["title"],
+                    "datum":        deal["datum"],
+                    "datum_de":     datetime.datetime.strptime(deal["datum"], "%Y-%m-%d").strftime("%d.%m.%Y"),
+                    "value":        deal["value"],
+                    "date_from":    date_from,
+                    "date_to":      min(date_to, TODAY),
                     "date_from_de": datetime.datetime.strptime(date_from, "%Y-%m-%d").strftime("%d.%m."),
                     "date_to_de":   datetime.datetime.strptime(min(date_to, TODAY), "%Y-%m-%d").strftime("%d.%m.%Y"),
                 })
@@ -940,28 +944,37 @@ def main():
         adv_clicks_raw = {}
         deal_clicks_raw = {}  # key -> [{title, won, date_from/to, klickbar, banner, total}]
 
-        def fetch_adv_deal_clicks_all(a):
-            """Alle per-Deal-Klicks für einen Advertiser (sequenziell)."""
-            results = []
-            for dr in adv_deal_ranges.get(a["key"], []):
-                c = fetch_deal_clicks(a["seg"], dr["date_from"], dr["date_to"], a.get("banner", False))
-                results.append({**dr, **c})
-            return a["key"], results
+        def fetch_single_deal(a, dr):
+            """Klicks für genau einen Deal-Zeitraum."""
+            c = fetch_deal_clicks(a["seg"], dr["date_from"], dr["date_to"], a.get("banner", False))
+            return a["key"], dr, c
 
-        with ThreadPoolExecutor(max_workers=5) as ex:
-            futures_total = {ex.submit(fetch_advertiser_clicks, a): ("total", a) for a in ADVERTISERS}
-            futures_deals = {ex.submit(fetch_adv_deal_clicks_all, a): ("deals", a)
-                             for a in ADVERTISERS if adv_deal_ranges.get(a["key"])}
-            for future in as_completed({**futures_total, **futures_deals}):
-                kind, a = ({**futures_total, **futures_deals})[future]
+        with ThreadPoolExecutor(max_workers=8) as ex:
+            futures_total = {ex.submit(fetch_advertiser_clicks, a): ("total", a, None)
+                             for a in ADVERTISERS}
+            futures_deals = {ex.submit(fetch_single_deal, a, dr): ("deal", a, dr)
+                             for a in ADVERTISERS
+                             for dr in adv_deal_ranges.get(a["key"], [])}
+            all_futures = {**futures_total, **futures_deals}
+            deal_results_raw = {}  # key -> list of {dr, clicks}
+            for future in as_completed(all_futures):
+                kind, a, dr = all_futures[future]
                 if kind == "total":
                     key, data = future.result()
                     adv_clicks_raw[key] = data
                     log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']}")
                 else:
-                    key, results = future.result()
-                    deal_clicks_raw[key] = results
-                    log(f"  {key}: {len(results)} Deals mit Einzelklicks")
+                    key, dr_res, c = future.result()
+                    if key not in deal_results_raw:
+                        deal_results_raw[key] = []
+                    deal_results_raw[key].append({**dr_res, **c})
+                    log(f"  {key} [{dr_res['datum_de']}]: {c['total']} Klicks")
+
+        # Deal-Ergebnisse nach Erscheinungsdatum sortieren
+        for key in deal_results_raw:
+            deal_results_raw[key].sort(key=lambda x: x["datum"])
+        for a in ADVERTISERS:
+            deal_clicks_raw[a["key"]] = deal_results_raw.get(a["key"], [])
 
         adv_clicks = {}
         for a in ADVERTISERS:
