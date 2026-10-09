@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T06:27:32",
+  "generated_at": "2026-10-09T06:26:22",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
   "total_db": 5495.41,
@@ -123,17 +123,17 @@
     }
   ],
   "process": {
-    "activities_total": 573,
-    "deals_created_total": 384,
+    "activities_total": 579,
+    "deals_created_total": 387,
     "deals_by_status": {
-      "open": 158,
+      "open": 154,
       "won": 80,
-      "lost": 146
+      "lost": 153
     },
     "conversion": {
-      "to_deal_pct": 67.0,
-      "to_won_pct": 14.0,
-      "win_rate_pct": 35.4,
+      "to_deal_pct": 66.8,
+      "to_won_pct": 13.8,
+      "win_rate_pct": 34.3,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -183,11 +183,11 @@
       },
       {
         "week": "W40",
-        "count": 93
+        "count": 91
       },
       {
         "week": "W41",
-        "count": 86
+        "count": 94
       }
     ],
     "weekly_deals": [
@@ -270,17 +270,17 @@
       },
       {
         "week": "W40",
-        "open": 35,
+        "open": 33,
         "won": 5,
-        "lost": 27,
+        "lost": 29,
         "total": 67
       },
       {
         "week": "W41",
-        "open": 43,
+        "open": 41,
         "won": 1,
-        "lost": 11,
-        "total": 55
+        "lost": 16,
+        "total": 58
       }
     ],
     "weekly_conversion": [
@@ -374,19 +374,19 @@
       },
       {
         "week": "W40",
-        "activities": 93,
+        "activities": 91,
         "deals_created": 67,
         "won": 5,
-        "to_deal_pct": 72.0,
-        "to_won_pct": 5.4
+        "to_deal_pct": 73.6,
+        "to_won_pct": 5.5
       },
       {
         "week": "W41",
-        "activities": 86,
-        "deals_created": 55,
+        "activities": 94,
+        "deals_created": 58,
         "won": 1,
-        "to_deal_pct": 64.0,
-        "to_won_pct": 1.2
+        "to_deal_pct": 61.7,
+        "to_won_pct": 1.1
       }
     ]
   },
