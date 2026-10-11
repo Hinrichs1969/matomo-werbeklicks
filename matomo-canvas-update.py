@@ -698,7 +698,6 @@ def generate_customer_html(adv, clicks):
     klickbar = clicks.get("klickbar", 0)
     banner   = clicks.get("banner", 0)
     views    = clicks.get("views", 0)
-    uniq     = clicks.get("uniq", 0)
     has_banner_product = adv.get("banner", False)
     bz_raw   = clicks.get("bz")
     hk_raw   = clicks.get("hk")
@@ -708,8 +707,25 @@ def generate_customer_html(adv, clicks):
     mag = max(0, total - bz - hk) if split_available else 0
     daily_data = clicks.get("daily", {})  # {date_str: {klicks, views}}
 
+    # ---- Deutsche Zahlenformatierung ----
+    def fmt(n):
+        """Integer: 27.256 (Punkt als Tausendertrenner)"""
+        return f"{int(n):,}".replace(",", ".")
+
+    def fmt_dec(n, d=1):
+        """Dezimalzahl: 3,5 (Komma als Dezimaltrenner)"""
+        s = f"{n:.{d}f}"
+        return s.replace(".", ",")
+
     # CTR (Klickrate) = Klicks / Einblendungen
-    ctr_pct = f"{klickbar / views * 100:.1f}&thinsp;%" if views else "–"
+    ctr_val = (klickbar / views * 100) if views else None
+    ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+
+    # Ø Klicks pro Tag (Gesamtzeitraum seit 01.07.)
+    start_d  = datetime.date(2026, 7, 1)
+    today_d  = datetime.date.today()
+    total_days = (today_d - start_d).days + 1
+    avg_day  = fmt_dec(total / total_days) if total_days else "–"
 
     def pct(v):
         return f"{(v / total * 100):.0f}" if total else "–"
@@ -726,9 +742,9 @@ def generate_customer_html(adv, clicks):
         pub_bar_bz  = bar(bz,  max_pub, "#1d4ed8")
         pub_bar_hk  = bar(hk,  max_pub, "#16a34a")
         pub_bar_mag = bar(mag, max_pub, "#9ca3af")
-        pub_val_bz  = f"{bz:,}"
-        pub_val_hk  = f"{hk:,}"
-        pub_val_mag = f"{mag:,}"
+        pub_val_bz  = fmt(bz)
+        pub_val_hk  = fmt(hk)
+        pub_val_mag = fmt(mag)
         pub_pct_bz  = f"{pct(bz)}&thinsp;%"
         pub_pct_hk  = f"{pct(hk)}&thinsp;%"
         pub_pct_mag = f"{pct(mag)}&thinsp;%"
@@ -743,7 +759,7 @@ def generate_customer_html(adv, clicks):
         kpi_grid_cols = "repeat(4,1fr)"
         banner_kpi_block = f"""  <div class="kpi">
     <div class="kpi-label">Banner / Interstitial</div>
-    <div class="kpi-value" style="color:#0891b2">{banner:,}</div>
+    <div class="kpi-value" style="color:#0891b2">{fmt(banner)}</div>
     <div class="kpi-sub">banner_click</div>
   </div>"""
         format_split_section = f"""<div class="section">
@@ -751,18 +767,18 @@ def generate_customer_html(adv, clicks):
   <div class="split-row">
     <div class="split-label">Klickbare Anzeige</div>
     <div class="split-bar">{bar(klickbar, max(klickbar, banner, 1), "#6366f1")}</div>
-    <div class="split-val">{klickbar:,}</div>
+    <div class="split-val">{fmt(klickbar)}</div>
     <div class="split-pct">{pct(klickbar)}&thinsp;%</div>
   </div>
   <div class="split-row">
     <div class="split-label">Banner / Interstitial</div>
     <div class="split-bar">{bar(banner, max(klickbar, banner, 1), "#0891b2")}</div>
-    <div class="split-val">{banner:,}</div>
+    <div class="split-val">{fmt(banner)}</div>
     <div class="split-pct">{pct(banner)}&thinsp;%</div>
   </div>
 </div>"""
     else:
-        kpi_grid_cols = "repeat(4,1fr)"
+        kpi_grid_cols = "repeat(3,1fr)"
         banner_kpi_block = ""
         format_split_section = ""
 
@@ -775,15 +791,15 @@ def generate_customer_html(adv, clicks):
             db  = dr.get("banner", 0)
             dt  = dr.get("total", 0)
             dv  = dr.get("views", 0)
-            du  = dr.get("uniq", 0)
             dbz = dr.get("bz")
             dhk = dr.get("hk")
             title_short = dr["title"][:60] + ("…" if len(dr["title"]) > 60 else "")
             date_from_d = datetime.datetime.strptime(dr["date_from"], "%Y-%m-%d")
             date_to_d   = datetime.datetime.strptime(dr["date_to"],   "%Y-%m-%d")
             days = (date_to_d - date_from_d).days + 1
-            ctr_day  = f"{dt/days:.1f}" if days > 0 else "–"
-            deal_ctr = f"{dk/dv*100:.1f}&thinsp;%" if dv else "–"
+            ctr_day  = fmt_dec(dt / days) if days > 0 else "–"
+            deal_ctr = f"{fmt_dec(dk / dv * 100)}&thinsp;%" if dv else "–"
+            no_data  = (dt == 0)
 
             # Ausgabe-Badge
             deal_ausgabe = dr.get("ausgabe") or adv.get("pub", "both")
@@ -794,12 +810,12 @@ def generate_customer_html(adv, clicks):
             else:
                 badge_html = '<span class="badge both-badge">BZ+HK</span>'
 
-            # BZ/HK-Split für diesen Deal
-            if dbz is not None and dhk is not None:
+            # BZ/HK-Split für diesen Deal (nur wenn sinnvoll)
+            if dbz is not None and dhk is not None and (dbz > 0 or dhk > 0):
                 deal_split_html = f"""<div class="deal-split">
-  <span class="deal-split-bz">{dbz:,}&thinsp;BZ</span>
+  <span class="deal-split-bz">{fmt(dbz)}&thinsp;BZ</span>
   <span class="deal-split-sep">·</span>
-  <span class="deal-split-hk">{dhk:,}&thinsp;HK</span>
+  <span class="deal-split-hk">{fmt(dhk)}&thinsp;HK</span>
 </div>"""
             else:
                 deal_split_html = ""
@@ -812,34 +828,41 @@ def generate_customer_html(adv, clicks):
                 n  = daily_data.get(ds, {}).get("klicks", 0)
                 spark_bars.append((cur.strftime("%d.%m."), n))
                 cur += datetime.timedelta(days=1)
-            max_bar = max((n for _, n in spark_bars), default=1) or 1
-            bars_html = ""
-            for date_de, n in spark_bars:
-                h = max(round(n / max_bar * 100), 2)
-                bars_html += f'<div class="sbar" style="height:{h}%" title="{date_de}: {n:,}"></div>'
-            peak_date = max(spark_bars, key=lambda x: x[1], default=("–", 0))
-            peak_note = f"Stärkster Tag: <strong>{peak_date[0]} ({peak_date[1]:,} Klicks)</strong>" if peak_date[1] > 0 else ""
+            max_bar    = max((n for _, n in spark_bars), default=0)
+            has_spark  = max_bar > 0
+            peak_date  = max(spark_bars, key=lambda x: x[1], default=("–", 0)) if has_spark else None
 
-            # Unique-Zeile nur wenn Daten vorhanden
-            uniq_html = f'<div class="deal-kpi"><span class="dkl">Unique Leser</span><span class="dkv">{du:,}</span></div>' if du else ""
+            if has_spark:
+                bars_html = ""
+                for date_de, n in spark_bars:
+                    h = max(round(n / max_bar * 100), 2) if max_bar else 2
+                    bars_html += f'<div class="sbar" style="height:{h}%" title="{date_de}: {fmt(n)}"></div>'
+                peak_note = f"Stärkster Tag: <strong>{peak_date[0]} ({fmt(peak_date[1])} Klicks)</strong>"
+                sparkline_html = f"""<div class="sparkline-wrap">
+    <div class="sparkline">{bars_html}</div>
+    <div class="spark-note">{peak_note}</div>
+  </div>"""
+            else:
+                sparkline_html = ""
 
-            deal_cards_html += f"""<div class="deal-card">
+            # Card-Stil: gedimmt wenn keine Klicks
+            card_style = ' style="opacity:0.55"' if no_data else ""
+            no_data_note = '<div class="no-data-note">Keine Klicks im Messzeitraum erfasst</div>' if no_data else ""
+
+            deal_cards_html += f"""<div class="deal-card"{card_style}>
   <div class="deal-header">
     <div class="deal-title">{title_short} {badge_html}</div>
     <div class="deal-meta">Erschienen: {dr["datum_de"]} &middot; Messzeitraum: {dr["date_from_de"]}–{dr["date_to_de"]} ({days}&thinsp;Tage)</div>
   </div>
+  {no_data_note}
   <div class="deal-kpis">
-    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{dt:,}</span></div>
-    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">{dv:,}</span></div>
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{fmt(dt)}</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">{fmt(dv)}</span></div>
     <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">{deal_ctr}</span></div>
-    {uniq_html}
     <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">{ctr_day}</span></div>
   </div>
   {deal_split_html}
-  <div class="sparkline-wrap">
-    <div class="sparkline">{bars_html}</div>
-    <div class="spark-note">{peak_note}</div>
-  </div>
+  {sparkline_html}
 </div>"""
 
         deals_section = f"""<div class="section">
@@ -862,7 +885,7 @@ def generate_customer_html(adv, clicks):
             n = v["klicks"]
             h = max(round(n / max_day * 100), 2)
             de = datetime.datetime.strptime(ds, "%Y-%m-%d").strftime("%d.%m.")
-            chart_bars += f'<div class="sbar" style="height:{h}%" title="{de}: {n:,}"></div>'
+            chart_bars += f'<div class="sbar" style="height:{h}%" title="{de}: {fmt(n)}"></div>'
         # X-Achse: nur jeden 7. Tag beschriften
         axis_labels = ""
         days_list = [ds for ds, _ in sorted_days]
@@ -898,7 +921,7 @@ def generate_customer_html(adv, clicks):
   .kpi-grid {{ display:grid; grid-template-columns:{kpi_grid_cols}; gap:12px; margin-bottom:28px; }}
   .kpi {{ border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }}
   .kpi-label {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }}
-  .kpi-value {{ font-size:24px; font-weight:800; }}
+  .kpi-value {{ font-size:24px; font-weight:800; line-height:1.1; }}
   .kpi-sub   {{ font-size:10px; color:#9ca3af; margin-top:2px; }}
   .section {{ margin-bottom:24px; }}
   .section-title {{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
@@ -906,7 +929,7 @@ def generate_customer_html(adv, clicks):
   .split-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
   .split-label {{ width:140px; font-size:12px; font-weight:600; flex-shrink:0; }}
   .split-bar   {{ flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }}
-  .split-val   {{ width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }}
+  .split-val   {{ width:54px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }}
   .split-pct   {{ width:36px; text-align:right; font-size:11px; color:#9ca3af; }}
   .note {{ background:#f0f9ff; border-left:3px solid #0ea5e9; padding:10px 14px;
            font-size:11px; color:#0c4a6e; border-radius:0 6px 6px 0; margin-bottom:20px; }}
@@ -925,12 +948,13 @@ def generate_customer_html(adv, clicks):
   .deal-kpis   {{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:8px; }}
   .deal-kpi    {{ display:flex; flex-direction:column; gap:1px; }}
   .dkl         {{ font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; }}
-  .dkv         {{ font-size:16px; font-weight:700; }}
+  .dkv         {{ font-size:16px; font-weight:700; line-height:1.2; }}
   .dkv.accent  {{ color:#6366f1; }}
   .deal-split  {{ font-size:11px; margin-bottom:8px; }}
   .deal-split-bz  {{ color:#1d4ed8; font-weight:600; }}
   .deal-split-hk  {{ color:#16a34a; font-weight:600; }}
   .deal-split-sep {{ color:#9ca3af; margin:0 4px; }}
+  .no-data-note {{ font-size:10px; color:#9ca3af; font-style:italic; margin-bottom:8px; }}
   /* Badges */
   .badge {{ display:inline-block; font-size:9px; font-weight:700; padding:1px 5px;
             border-radius:3px; letter-spacing:.04em; vertical-align:middle;
@@ -966,23 +990,18 @@ def generate_customer_html(adv, clicks):
 <div class="kpi-grid">
   <div class="kpi">
     <div class="kpi-label">Klicks gesamt</div>
-    <div class="kpi-value">{total:,}</div>
+    <div class="kpi-value">{fmt(total)}</div>
     <div class="kpi-sub">seit 01.07.2026</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Einblendungen</div>
-    <div class="kpi-value" style="color:#64748b">{views:,}</div>
+    <div class="kpi-value" style="color:#64748b">{fmt(views)}</div>
     <div class="kpi-sub">replica_box_link_view</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Klickrate (CTR)</div>
     <div class="kpi-value" style="color:#0891b2">{ctr_pct}</div>
     <div class="kpi-sub">Klicks / Einblendungen</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">Unique Leser</div>
-    <div class="kpi-value" style="color:#16a34a">{uniq:,}</div>
-    <div class="kpi-sub">eindeutige Besucher</div>
   </div>
 {banner_kpi_block}
 </div>
