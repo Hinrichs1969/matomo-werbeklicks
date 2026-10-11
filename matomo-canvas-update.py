@@ -173,15 +173,19 @@ def fetch_advertiser_clicks(adv):
         "segment": adv["seg"],
     })
     has_banner_product = adv.get("banner", False)
-    klickbar = banner = 0
+    klickbar = banner = views = uniq = 0
     if isinstance(raw, list):
         for e in raw:
             n = e.get("label", "")
             if n == "replica_box_link_click":
                 klickbar = int(e.get("nb_events", 0))
+                uniq     = int(e.get("nb_uniq_visitors", 0))
             if n == "banner_click" and has_banner_product:
                 banner = int(e.get("nb_events", 0))
-    return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
+            if n == "replica_box_link_view":
+                views = int(e.get("nb_events", 0))
+    return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner,
+                        "views": views, "uniq": uniq}
 
 
 
@@ -208,6 +212,8 @@ def fetch_pipedrive_deals():
     SKIP_AUSGABEN = {"2462", "852"}   # Vermittlung, jobsfuerniedersachsen.de
     SKIP_KW = ("jobsfuer", "nordh.wochenblatt", "rotenb", "landeszeitung",
                "walsroder zeitung", "vermittlung")
+    # Ausgabe-ID → Publikation
+    AUSGABE_MAP = {"470": "BZ", "2507": "BZ", "2463": "HK"}
 
     by_org = {}
     for d in (data.get("data") or []):
@@ -230,11 +236,14 @@ def fetch_pipedrive_deals():
             continue
         if org_id not in by_org:
             by_org[org_id] = []
+        ausgabe_id = str(d.get(AUSGABE_KEY) or "")
+        ausgabe = AUSGABE_MAP.get(ausgabe_id)   # "BZ" / "HK" / None (=beide)
         by_org[org_id].append({
-            "title": d.get("title", ""),
-            "datum": datum,   # Erscheinungsdatum (oder won_time als Fallback)
-            "value": float(d.get("value") or 0),
-            "id":    d.get("id"),
+            "title":   d.get("title", ""),
+            "datum":   datum,   # Erscheinungsdatum (oder won_time als Fallback)
+            "value":   float(d.get("value") or 0),
+            "id":      d.get("id"),
+            "ausgabe": ausgabe,  # "BZ", "HK" oder None
         })
     for oid in by_org:
         by_org[oid].sort(key=lambda x: x["datum"])
@@ -249,29 +258,58 @@ def fetch_deal_clicks(seg, date_from, date_to, has_banner):
         "filter_limit": "20",
         "segment": seg,
     }, retries=1, backoff=5)
-    klickbar = banner = 0
+    klickbar = banner = views = uniq = 0
     if isinstance(raw, list):
         for e in raw:
             n = e.get("label", "")
             if n == "replica_box_link_click":
                 klickbar = int(e.get("nb_events", 0))
+                uniq     = int(e.get("nb_uniq_visitors", 0))
             if n == "banner_click" and has_banner:
                 banner = int(e.get("nb_events", 0))
-    return {"klickbar": klickbar, "banner": banner, "total": klickbar + banner}
+            if n == "replica_box_link_view":
+                views = int(e.get("nb_events", 0))
+    return {"klickbar": klickbar, "banner": banner, "total": klickbar + banner,
+            "views": views, "uniq": uniq}
 
 
-def compute_bz_hk_split(total, adv):
-    """Berechnet BZ/HK-Split aus dem 'pub'-Feld des Advertisers (Pipedrive-Ausgabe).
-    pub='BZ'  → bz=total, hk=0
-    pub='HK'  → bz=0,     hk=total
-    pub='both'→ bz=None,  hk=None  (Cross-Selling; kein Split möglich)
+def compute_bz_hk_split(total, pub_override):
+    """Berechnet BZ/HK-Split.
+    pub_override: "BZ" | "HK" | "both" / None  (aus Advertiser oder Deal-Ausgabe)
     """
-    pub = adv.get("pub", "both")
+    pub = pub_override if pub_override else "both"
     if pub == "BZ":
         return {"total": total, "bz": total, "hk": 0}
     if pub == "HK":
         return {"total": total, "bz": 0, "hk": total}
     return {"total": total, "bz": None, "hk": None}
+
+
+def fetch_advertiser_daily(adv):
+    """Tagesweise Klicks + Views (Gesamtzeitraum) für einen Werbekunden."""
+    raw = matomo_post({
+        "module": "API", "method": "Events.getName",
+        "period": "day", "date": f"{START},{TODAY}",
+        "filter_limit": "10",
+        "segment": adv["seg"],
+    }, retries=1, backoff=5)
+    has_banner = adv.get("banner", False)
+    result = {}
+    if isinstance(raw, dict):
+        for date_str, events in raw.items():
+            klicks = views = 0
+            if isinstance(events, list):
+                for e in events:
+                    n = e.get("label", "")
+                    if n == "replica_box_link_click":
+                        klicks += int(e.get("nb_events", 0))
+                    if n == "banner_click" and has_banner:
+                        klicks += int(e.get("nb_events", 0))
+                    if n == "replica_box_link_view":
+                        views += int(e.get("nb_events", 0))
+            if klicks or views:
+                result[date_str] = {"klicks": klicks, "views": views}
+    return adv["key"], result
 
 
 def js_bool(v):
@@ -659,13 +697,19 @@ def generate_customer_html(adv, clicks):
     total    = clicks.get("total", 0)
     klickbar = clicks.get("klickbar", 0)
     banner   = clicks.get("banner", 0)
+    views    = clicks.get("views", 0)
+    uniq     = clicks.get("uniq", 0)
     has_banner_product = adv.get("banner", False)
-    bz_raw   = clicks.get("bz")   # None wenn Batch nicht verfügbar
-    hk_raw   = clicks.get("hk")   # None wenn Batch nicht verfügbar
+    bz_raw   = clicks.get("bz")
+    hk_raw   = clicks.get("hk")
     split_available = bz_raw is not None and hk_raw is not None
-    bz       = bz_raw if split_available else 0
-    hk       = hk_raw if split_available else 0
-    mag      = max(0, total - bz - hk) if split_available else 0
+    bz  = bz_raw if split_available else 0
+    hk  = hk_raw if split_available else 0
+    mag = max(0, total - bz - hk) if split_available else 0
+    daily_data = clicks.get("daily", {})  # {date_str: {klicks, views}}
+
+    # CTR (Klickrate) = Klicks / Einblendungen
+    ctr_pct = f"{klickbar / views * 100:.1f}&thinsp;%" if views else "–"
 
     def pct(v):
         return f"{(v / total * 100):.0f}" if total else "–"
@@ -676,7 +720,7 @@ def generate_customer_html(adv, clicks):
 
     max_pub = max(bz, hk, mag, 1)
 
-    # Pre-computed Ausgabewerte für den Publikations-Split
+    # Publikations-Split
     if split_available:
         pub_unavail_note = ""
         pub_bar_bz  = bar(bz,  max_pub, "#1d4ed8")
@@ -689,14 +733,14 @@ def generate_customer_html(adv, clicks):
         pub_pct_hk  = f"{pct(hk)}&thinsp;%"
         pub_pct_mag = f"{pct(mag)}&thinsp;%"
     else:
-        pub_unavail_note = '<div class="note" style="margin-bottom:12px">Aufteilung BZ&nbsp;/&nbsp;HK aktuell nicht verf&uuml;gbar (Matomo-Server-Einschr&auml;nkung). Gesamt-Klicks sind korrekt.</div>'
+        pub_unavail_note = '<div class="note" style="margin-bottom:12px">Aufteilung BZ&nbsp;/&nbsp;HK nur f&uuml;r Cross-Selling-Kunden mit gemeinsamer Anzeige nicht verf&uuml;gbar.</div>'
         pub_bar_bz = pub_bar_hk = pub_bar_mag = ""
         pub_val_bz = pub_val_hk = pub_val_mag = "&ndash;"
         pub_pct_bz = pub_pct_hk = pub_pct_mag = ""
 
-    # KPI-Block und Format-Split für Banner nur wenn Banner-Produkt gebucht
+    # Banner-KPI und Format-Split
     if has_banner_product:
-        kpi_grid_cols = "repeat(3,1fr)"
+        kpi_grid_cols = "repeat(4,1fr)"
         banner_kpi_block = f"""  <div class="kpi">
     <div class="kpi-label">Banner / Interstitial</div>
     <div class="kpi-value" style="color:#0891b2">{banner:,}</div>
@@ -718,60 +762,123 @@ def generate_customer_html(adv, clicks):
   </div>
 </div>"""
     else:
-        kpi_grid_cols = "repeat(2,1fr)"
+        kpi_grid_cols = "repeat(4,1fr)"
         banner_kpi_block = ""
         format_split_section = ""
 
-    # ---- Deal-Tabelle (per-Anzeigen-Auswertung) ----
+    # ---- Deal-Karten (pro Anzeige mit Sparkline) ----
     deals = clicks.get("deals", [])
+    deal_cards_html = ""
     if deals:
-        # CSS für Tabelle (wird nur einmal im Dokument benötigt, inline ist OK)
-        deals_rows = ""
         for dr in deals:
-            dk = dr.get("klickbar", 0)
-            db = dr.get("banner", 0)
-            dt = dr.get("total", 0)
-            title_short = dr["title"][:55] + ("…" if len(dr["title"]) > 55 else "")
-            days = (datetime.datetime.strptime(dr["date_to"], "%Y-%m-%d") -
-                    datetime.datetime.strptime(dr["date_from"], "%Y-%m-%d")).days + 1
-            ctr_day = f"{dt/days:.1f}" if days > 0 else "–"
-            banner_cell = f'<td style="text-align:right">{db:,}</td>' if has_banner_product else ""
-            deals_rows += f"""<tr>
-  <td>{title_short}</td>
-  <td style="text-align:center">{dr["datum_de"]}</td>
-  <td style="text-align:center;color:#6b7280">{dr["date_from_de"]}–{dr["date_to_de"]}</td>
-  <td style="text-align:center;color:#6b7280">{days}&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">{dt:,}</td>
-  <td style="text-align:right;color:#4b5563">{dk:,}</td>
-  {banner_cell}
-  <td style="text-align:right;color:#9ca3af">{ctr_day}</td>
-</tr>"""
-        banner_header = '<th style="text-align:right">Banner</th>' if has_banner_product else ""
-        deals_table_section = f"""<div class="section">
+            dk  = dr.get("klickbar", 0)
+            db  = dr.get("banner", 0)
+            dt  = dr.get("total", 0)
+            dv  = dr.get("views", 0)
+            du  = dr.get("uniq", 0)
+            dbz = dr.get("bz")
+            dhk = dr.get("hk")
+            title_short = dr["title"][:60] + ("…" if len(dr["title"]) > 60 else "")
+            date_from_d = datetime.datetime.strptime(dr["date_from"], "%Y-%m-%d")
+            date_to_d   = datetime.datetime.strptime(dr["date_to"],   "%Y-%m-%d")
+            days = (date_to_d - date_from_d).days + 1
+            ctr_day  = f"{dt/days:.1f}" if days > 0 else "–"
+            deal_ctr = f"{dk/dv*100:.1f}&thinsp;%" if dv else "–"
+
+            # Ausgabe-Badge
+            deal_ausgabe = dr.get("ausgabe") or adv.get("pub", "both")
+            if deal_ausgabe == "BZ":
+                badge_html = '<span class="badge bz-badge">BZ</span>'
+            elif deal_ausgabe == "HK":
+                badge_html = '<span class="badge hk-badge">HK</span>'
+            else:
+                badge_html = '<span class="badge both-badge">BZ+HK</span>'
+
+            # BZ/HK-Split für diesen Deal
+            if dbz is not None and dhk is not None:
+                deal_split_html = f"""<div class="deal-split">
+  <span class="deal-split-bz">{dbz:,}&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">{dhk:,}&thinsp;HK</span>
+</div>"""
+            else:
+                deal_split_html = ""
+
+            # Sparkline: daily Klicks im Deal-Zeitraum
+            spark_bars = []
+            cur = date_from_d
+            while cur <= date_to_d:
+                ds = cur.strftime("%Y-%m-%d")
+                n  = daily_data.get(ds, {}).get("klicks", 0)
+                spark_bars.append((cur.strftime("%d.%m."), n))
+                cur += datetime.timedelta(days=1)
+            max_bar = max((n for _, n in spark_bars), default=1) or 1
+            bars_html = ""
+            for date_de, n in spark_bars:
+                h = max(round(n / max_bar * 100), 2)
+                bars_html += f'<div class="sbar" style="height:{h}%" title="{date_de}: {n:,}"></div>'
+            peak_date = max(spark_bars, key=lambda x: x[1], default=("–", 0))
+            peak_note = f"Stärkster Tag: <strong>{peak_date[0]} ({peak_date[1]:,} Klicks)</strong>" if peak_date[1] > 0 else ""
+
+            # Unique-Zeile nur wenn Daten vorhanden
+            uniq_html = f'<div class="deal-kpi"><span class="dkl">Unique Leser</span><span class="dkv">{du:,}</span></div>' if du else ""
+
+            deal_cards_html += f"""<div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">{title_short} {badge_html}</div>
+    <div class="deal-meta">Erschienen: {dr["datum_de"]} &middot; Messzeitraum: {dr["date_from_de"]}–{dr["date_to_de"]} ({days}&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{dt:,}</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">{dv:,}</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">{deal_ctr}</span></div>
+    {uniq_html}
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">{ctr_day}</span></div>
+  </div>
+  {deal_split_html}
+  <div class="sparkline-wrap">
+    <div class="sparkline">{bars_html}</div>
+    <div class="spark-note">{peak_note}</div>
+  </div>
+</div>"""
+
+        deals_section = f"""<div class="section">
   <div class="section-title">Klicks nach Anzeige &amp; Erscheinungsdatum</div>
-  <p style="font-size:10px;color:#9ca3af;margin-bottom:10px">
-    Der Zeitraum je Anzeige reicht vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
-    (bzw. heute f&uuml;r die letzte Anzeige). Grundlage: Pipedrive-Deals &amp; Matomo.
+  <p style="font-size:10px;color:#9ca3af;margin:0 0 12px">
+    Zeitraum je Anzeige: vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
+    (letzte Anzeige: bis heute). Grundlage: Pipedrive-Deals&nbsp;&amp;&nbsp;Matomo.
   </p>
-  <table style="width:100%;border-collapse:collapse;font-size:11px">
-    <thead>
-      <tr style="border-bottom:2px solid #e4e7ec;text-align:left">
-        <th style="padding:4px 6px">Anzeige</th>
-        <th style="text-align:center;padding:4px 6px">Erschienen</th>
-        <th style="text-align:center;padding:4px 6px">Messzeitraum</th>
-        <th style="text-align:center;padding:4px 6px">Tage</th>
-        <th style="text-align:right;padding:4px 6px">Klicks</th>
-        <th style="text-align:right;padding:4px 6px">Klickbar</th>
-        {banner_header}
-        <th style="text-align:right;padding:4px 6px">&#216;/Tag</th>
-      </tr>
-    </thead>
-    <tbody style="border-bottom:1px solid #e4e7ec">
-{deals_rows}    </tbody>
-  </table>
+  {deal_cards_html}
 </div>"""
     else:
-        deals_table_section = ""
+        deals_section = ""
+
+    # Gesamt-Tagesverlauf (alle Klicks)
+    if daily_data:
+        sorted_days = sorted(daily_data.items())
+        max_day = max((v["klicks"] for _, v in sorted_days), default=1) or 1
+        chart_bars = ""
+        for ds, v in sorted_days:
+            n = v["klicks"]
+            h = max(round(n / max_day * 100), 2)
+            de = datetime.datetime.strptime(ds, "%Y-%m-%d").strftime("%d.%m.")
+            chart_bars += f'<div class="sbar" style="height:{h}%" title="{de}: {n:,}"></div>'
+        # X-Achse: nur jeden 7. Tag beschriften
+        axis_labels = ""
+        days_list = [ds for ds, _ in sorted_days]
+        for i, ds in enumerate(days_list):
+            de = datetime.datetime.strptime(ds, "%Y-%m-%d").strftime("%d.%m.")
+            show = (i % 7 == 0)
+            axis_labels += f'<div class="axis-label" style="opacity:{1 if show else 0}">{de}</div>'
+        daily_section = f"""<div class="section">
+  <div class="section-title">Tagesverlauf &ndash; Klicks gesamt</div>
+  <div class="chart-wrap">
+    <div class="sparkline tall">{chart_bars}</div>
+    <div class="axis">{axis_labels}</div>
+  </div>
+</div>"""
+    else:
+        daily_section = ""
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -782,7 +889,7 @@ def generate_customer_html(adv, clicks):
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 720px; margin: 0 auto; }}
+         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 740px; margin: 0 auto; }}
   .logo-bar {{ display:flex; align-items:center; gap:12px; margin-bottom:24px; border-bottom:2px solid #e4e7ec; padding-bottom:14px; }}
   .logo-text {{ font-size:15px; font-weight:700; color:#1e40af; letter-spacing:-.01em; }}
   .logo-sub  {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }}
@@ -791,13 +898,13 @@ def generate_customer_html(adv, clicks):
   .kpi-grid {{ display:grid; grid-template-columns:{kpi_grid_cols}; gap:12px; margin-bottom:28px; }}
   .kpi {{ border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }}
   .kpi-label {{ font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }}
-  .kpi-value {{ font-size:26px; font-weight:800; }}
+  .kpi-value {{ font-size:24px; font-weight:800; }}
   .kpi-sub   {{ font-size:10px; color:#9ca3af; margin-top:2px; }}
   .section {{ margin-bottom:24px; }}
   .section-title {{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
                     color:#6b7280; border-bottom:1px solid #e4e7ec; padding-bottom:6px; margin-bottom:12px; }}
   .split-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
-  .split-label {{ width:120px; font-size:12px; font-weight:600; flex-shrink:0; }}
+  .split-label {{ width:140px; font-size:12px; font-weight:600; flex-shrink:0; }}
   .split-bar   {{ flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }}
   .split-val   {{ width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }}
   .split-pct   {{ width:36px; text-align:right; font-size:11px; color:#9ca3af; }}
@@ -809,13 +916,44 @@ def generate_customer_html(adv, clicks):
                color:#fff; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
                border:none; text-decoration:none; }}
   @media print {{ .print-btn {{ display:none; }} @page {{ margin:14mm 16mm; size:A4; }} }}
+  /* Deal-Karten */
+  .deal-card {{ border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px;
+                margin-bottom:12px; background:#fafafa; page-break-inside:avoid; }}
+  .deal-header {{ margin-bottom:10px; }}
+  .deal-title  {{ font-size:13px; font-weight:700; margin-bottom:3px; }}
+  .deal-meta   {{ font-size:10px; color:#6b7280; }}
+  .deal-kpis   {{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:8px; }}
+  .deal-kpi    {{ display:flex; flex-direction:column; gap:1px; }}
+  .dkl         {{ font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; }}
+  .dkv         {{ font-size:16px; font-weight:700; }}
+  .dkv.accent  {{ color:#6366f1; }}
+  .deal-split  {{ font-size:11px; margin-bottom:8px; }}
+  .deal-split-bz  {{ color:#1d4ed8; font-weight:600; }}
+  .deal-split-hk  {{ color:#16a34a; font-weight:600; }}
+  .deal-split-sep {{ color:#9ca3af; margin:0 4px; }}
+  /* Badges */
+  .badge {{ display:inline-block; font-size:9px; font-weight:700; padding:1px 5px;
+            border-radius:3px; letter-spacing:.04em; vertical-align:middle;
+            margin-left:5px; }}
+  .bz-badge   {{ background:#dbeafe; color:#1d4ed8; }}
+  .hk-badge   {{ background:#dcfce7; color:#16a34a; }}
+  .both-badge {{ background:#f3e8ff; color:#7c3aed; }}
+  /* Sparklines */
+  .sparkline-wrap {{ margin-top:8px; }}
+  .spark-note {{ font-size:10px; color:#6b7280; margin-top:4px; }}
+  .sparkline {{ display:flex; align-items:flex-end; gap:1.5px; height:48px; }}
+  .sparkline.tall {{ height:72px; }}
+  .sbar {{ background:#6366f1; border-radius:1px 1px 0 0; flex:1; cursor:default; }}
+  .chart-wrap {{ }}
+  .axis {{ display:flex; gap:1.5px; margin-top:2px; }}
+  .axis-label {{ flex:1; font-size:7px; color:#9ca3af; text-align:center; overflow:hidden; }}
 </style>
 </head>
 <body>
 
 <div class="logo-bar">
   <div>
-    <div class="logo-text">Böhme-Zeitung / Heide-Kurier</div>
+    <div class="logo-text">B&ouml;hme-Zeitung / Heide-Kurier</div>
     <div class="logo-sub">Prenly E-Paper &middot; Online-Werbung</div>
   </div>
 </div>
@@ -823,7 +961,7 @@ def generate_customer_html(adv, clicks):
 <button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
 
 <h1>Klick-Bericht: {name}</h1>
-<p class="subtitle">Zeitraum: 01.07.2026 – {TODAY_DE} &middot; Ziel-URL: {url_disp} &middot; Stand: {TODAY_DE}</p>
+<p class="subtitle">Zeitraum: 01.07.2026 &ndash; {TODAY_DE} &middot; Ziel-URL: {url_disp} &middot; Stand: {TODAY_DE}</p>
 
 <div class="kpi-grid">
   <div class="kpi">
@@ -832,9 +970,19 @@ def generate_customer_html(adv, clicks):
     <div class="kpi-sub">seit 01.07.2026</div>
   </div>
   <div class="kpi">
-    <div class="kpi-label">Klickbare Anzeige</div>
-    <div class="kpi-value" style="color:#6366f1">{klickbar:,}</div>
-    <div class="kpi-sub">replica_box_link_click</div>
+    <div class="kpi-label">Einblendungen</div>
+    <div class="kpi-value" style="color:#64748b">{views:,}</div>
+    <div class="kpi-sub">replica_box_link_view</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Klickrate (CTR)</div>
+    <div class="kpi-value" style="color:#0891b2">{ctr_pct}</div>
+    <div class="kpi-sub">Klicks / Einblendungen</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Unique Leser</div>
+    <div class="kpi-value" style="color:#16a34a">{uniq:,}</div>
+    <div class="kpi-sub">eindeutige Besucher</div>
   </div>
 {banner_kpi_block}
 </div>
@@ -843,7 +991,7 @@ def generate_customer_html(adv, clicks):
   <div class="section-title">Verteilung nach Publikation</div>
   {pub_unavail_note}
   <div class="split-row">
-    <div class="split-label">Böhme-Zeitung</div>
+    <div class="split-label">B&ouml;hme-Zeitung</div>
     <div class="split-bar">{pub_bar_bz}</div>
     <div class="split-val">{pub_val_bz}</div>
     <div class="split-pct">{pub_pct_bz}</div>
@@ -862,10 +1010,11 @@ def generate_customer_html(adv, clicks):
   </div>
 </div>
 
-<div class="section">
 {format_split_section}
 
-{deals_table_section}
+{deals_section}
+
+{daily_section}
 
 <div class="note">
   Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 
@@ -881,7 +1030,6 @@ def generate_customer_html(adv, clicks):
 </body>
 </html>
 """
-
 
 def generate_all_customer_pages(adv_clicks):
     """Schreibt pro Werbekunde eine individuelle HTML-Seite nach berichte/<key>.html."""
@@ -933,6 +1081,7 @@ def main():
                     "datum":        deal["datum"],
                     "datum_de":     datetime.datetime.strptime(deal["datum"], "%Y-%m-%d").strftime("%d.%m.%Y"),
                     "value":        deal["value"],
+                    "ausgabe":      deal.get("ausgabe"),   # "BZ"/"HK"/None aus Pipedrive
                     "date_from":    date_from,
                     "date_to":      min(date_to, TODAY),
                     "date_from_de": datetime.datetime.strptime(date_from, "%Y-%m-%d").strftime("%d.%m."),
@@ -940,9 +1089,10 @@ def main():
                 })
             adv_deal_ranges[a["key"]] = ranges
 
-        log("Hole Werbekunden-Klicks (parallel: Gesamtzeitraum + per Deal)...")
+        log("Hole Werbekunden-Klicks (parallel: Gesamtzeitraum + per Deal + Tagesverlauf)...")
         adv_clicks_raw = {}
         deal_clicks_raw = {}  # key -> [{title, won, date_from/to, klickbar, banner, total}]
+        adv_daily_raw  = {}   # key -> {date_str: {klicks, views}}
 
         def fetch_single_deal(a, dr):
             """Klicks für genau einen Deal-Zeitraum."""
@@ -950,25 +1100,31 @@ def main():
             return a["key"], dr, c
 
         with ThreadPoolExecutor(max_workers=8) as ex:
-            futures_total = {ex.submit(fetch_advertiser_clicks, a): ("total", a, None)
-                             for a in ADVERTISERS}
-            futures_deals = {ex.submit(fetch_single_deal, a, dr): ("deal", a, dr)
-                             for a in ADVERTISERS
-                             for dr in adv_deal_ranges.get(a["key"], [])}
-            all_futures = {**futures_total, **futures_deals}
+            futures_total  = {ex.submit(fetch_advertiser_clicks, a): ("total", a, None)
+                              for a in ADVERTISERS}
+            futures_deals  = {ex.submit(fetch_single_deal, a, dr): ("deal", a, dr)
+                              for a in ADVERTISERS
+                              for dr in adv_deal_ranges.get(a["key"], [])}
+            futures_daily  = {ex.submit(fetch_advertiser_daily, a): ("daily", a, None)
+                              for a in ADVERTISERS}
+            all_futures = {**futures_total, **futures_deals, **futures_daily}
             deal_results_raw = {}  # key -> list of {dr, clicks}
             for future in as_completed(all_futures):
                 kind, a, dr = all_futures[future]
                 if kind == "total":
                     key, data = future.result()
                     adv_clicks_raw[key] = data
-                    log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']}")
-                else:
+                    log(f"  {key}: klickbar={data['klickbar']} banner={data['banner']} views={data['views']} uniq={data['uniq']}")
+                elif kind == "deal":
                     key, dr_res, c = future.result()
                     if key not in deal_results_raw:
                         deal_results_raw[key] = []
                     deal_results_raw[key].append({**dr_res, **c})
-                    log(f"  {key} [{dr_res['datum_de']}]: {c['total']} Klicks")
+                    log(f"  {key} [{dr_res['datum_de']}]: {c['total']} Klicks views={c['views']} uniq={c['uniq']}")
+                else:  # daily
+                    key, daily_dict = future.result()
+                    adv_daily_raw[key] = daily_dict
+                    log(f"  {key} daily: {len(daily_dict)} Tage mit Daten")
 
         # Deal-Ergebnisse nach Erscheinungsdatum sortieren
         for key in deal_results_raw:
@@ -978,16 +1134,25 @@ def main():
 
         adv_clicks = {}
         for a in ADVERTISERS:
-            raw = adv_clicks_raw.get(a["key"], {"klickbar": 0, "banner": 0, "total": 0})
-            split = compute_bz_hk_split(raw["total"], a)
+            raw  = adv_clicks_raw.get(a["key"], {"klickbar": 0, "banner": 0, "total": 0, "views": 0, "uniq": 0})
+            # Gesamtbericht-Split: nutzt Advertiser-Publikation (BZ/HK/both)
+            split = compute_bz_hk_split(raw["total"], a.get("pub", "both"))
+            # Per-Deal: wende Deal-Ausgabe an (überschreibt Advertiser-pub wenn bekannt)
+            deals = []
+            for dr in deal_results_raw.get(a["key"], []):
+                deal_pub = dr.get("ausgabe") or a.get("pub", "both")
+                dsplit = compute_bz_hk_split(dr.get("total", 0), deal_pub)
+                deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"]})
+            deals.sort(key=lambda x: x["datum"])
             adv_clicks[a["key"]] = {
                 **raw,
                 "bz":    split["bz"],
                 "hk":    split["hk"],
-                "deals": deal_clicks_raw.get(a["key"], []),
+                "deals": deals,
+                "daily": adv_daily_raw.get(a["key"], {}),
             }
             c = adv_clicks[a["key"]]
-            log(f"  {a['key']}: gesamt={c['total']} klickbar={c['klickbar']} banner={c['banner']} BZ={c['bz']} HK={c['hk']}")
+            log(f"  {a['key']}: gesamt={c['total']} klickbar={c['klickbar']} banner={c['banner']} BZ={c['bz']} HK={c['hk']} views={c['views']} uniq={c['uniq']}")
 
         log("Generiere und schreibe Canvas...")
         canvas_code = generate_canvas(daily, monthly, adv_clicks)
