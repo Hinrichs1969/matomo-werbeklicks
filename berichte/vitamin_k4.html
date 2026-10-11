@@ -7,22 +7,22 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 720px; margin: 0 auto; }
+         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 740px; margin: 0 auto; }
   .logo-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; border-bottom:2px solid #e4e7ec; padding-bottom:14px; }
   .logo-text { font-size:15px; font-weight:700; color:#1e40af; letter-spacing:-.01em; }
   .logo-sub  { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }
   h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
   .subtitle { font-size:12px; color:#6b7280; margin-bottom:24px; }
-  .kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:28px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
   .kpi { border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }
   .kpi-label { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
-  .kpi-value { font-size:26px; font-weight:800; }
+  .kpi-value { font-size:24px; font-weight:800; }
   .kpi-sub   { font-size:10px; color:#9ca3af; margin-top:2px; }
   .section { margin-bottom:24px; }
   .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
                     color:#6b7280; border-bottom:1px solid #e4e7ec; padding-bottom:6px; margin-bottom:12px; }
   .split-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-  .split-label { width:120px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .split-label { width:140px; font-size:12px; font-weight:600; flex-shrink:0; }
   .split-bar   { flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }
   .split-val   { width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }
   .split-pct   { width:36px; text-align:right; font-size:11px; color:#9ca3af; }
@@ -34,13 +34,44 @@
                color:#fff; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
                border:none; text-decoration:none; }
   @media print { .print-btn { display:none; } @page { margin:14mm 16mm; size:A4; } }
+  /* Deal-Karten */
+  .deal-card { border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px;
+                margin-bottom:12px; background:#fafafa; page-break-inside:avoid; }
+  .deal-header { margin-bottom:10px; }
+  .deal-title  { font-size:13px; font-weight:700; margin-bottom:3px; }
+  .deal-meta   { font-size:10px; color:#6b7280; }
+  .deal-kpis   { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:8px; }
+  .deal-kpi    { display:flex; flex-direction:column; gap:1px; }
+  .dkl         { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; }
+  .dkv         { font-size:16px; font-weight:700; }
+  .dkv.accent  { color:#6366f1; }
+  .deal-split  { font-size:11px; margin-bottom:8px; }
+  .deal-split-bz  { color:#1d4ed8; font-weight:600; }
+  .deal-split-hk  { color:#16a34a; font-weight:600; }
+  .deal-split-sep { color:#9ca3af; margin:0 4px; }
+  /* Badges */
+  .badge { display:inline-block; font-size:9px; font-weight:700; padding:1px 5px;
+            border-radius:3px; letter-spacing:.04em; vertical-align:middle;
+            margin-left:5px; }
+  .bz-badge   { background:#dbeafe; color:#1d4ed8; }
+  .hk-badge   { background:#dcfce7; color:#16a34a; }
+  .both-badge { background:#f3e8ff; color:#7c3aed; }
+  /* Sparklines */
+  .sparkline-wrap { margin-top:8px; }
+  .spark-note { font-size:10px; color:#6b7280; margin-top:4px; }
+  .sparkline { display:flex; align-items:flex-end; gap:1.5px; height:48px; }
+  .sparkline.tall { height:72px; }
+  .sbar { background:#6366f1; border-radius:1px 1px 0 0; flex:1; cursor:default; }
+  .chart-wrap { }
+  .axis { display:flex; gap:1.5px; margin-top:2px; }
+  .axis-label { flex:1; font-size:7px; color:#9ca3af; text-align:center; overflow:hidden; }
 </style>
 </head>
 <body>
 
 <div class="logo-bar">
   <div>
-    <div class="logo-text">Böhme-Zeitung / Heide-Kurier</div>
+    <div class="logo-text">B&ouml;hme-Zeitung / Heide-Kurier</div>
     <div class="logo-sub">Prenly E-Paper &middot; Online-Werbung</div>
   </div>
 </div>
@@ -48,7 +79,7 @@
 <button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
 
 <h1>Klick-Bericht: vitamin-k4.de</h1>
-<p class="subtitle">Zeitraum: 01.07.2026 – 11.10.2026 &middot; Ziel-URL: vitamin-k4.de &middot; Stand: 11.10.2026</p>
+<p class="subtitle">Zeitraum: 01.07.2026 &ndash; 11.10.2026 &middot; Ziel-URL: vitamin-k4.de &middot; Stand: 11.10.2026</p>
 
 <div class="kpi-grid">
   <div class="kpi">
@@ -57,9 +88,19 @@
     <div class="kpi-sub">seit 01.07.2026</div>
   </div>
   <div class="kpi">
-    <div class="kpi-label">Klickbare Anzeige</div>
-    <div class="kpi-value" style="color:#6366f1">1,242</div>
-    <div class="kpi-sub">replica_box_link_click</div>
+    <div class="kpi-label">Einblendungen</div>
+    <div class="kpi-value" style="color:#64748b">127,817</div>
+    <div class="kpi-sub">replica_box_link_view</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Klickrate (CTR)</div>
+    <div class="kpi-value" style="color:#0891b2">1.0&thinsp;%</div>
+    <div class="kpi-sub">Klicks / Einblendungen</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Unique Leser</div>
+    <div class="kpi-value" style="color:#16a34a">0</div>
+    <div class="kpi-sub">eindeutige Besucher</div>
   </div>
 
 </div>
@@ -68,7 +109,7 @@
   <div class="section-title">Verteilung nach Publikation</div>
   
   <div class="split-row">
-    <div class="split-label">Böhme-Zeitung</div>
+    <div class="split-label">B&ouml;hme-Zeitung</div>
     <div class="split-bar"><div style="background:#1d4ed8;height:12px;border-radius:3px;width:100%;min-width:2px"></div></div>
     <div class="split-val">1,242</div>
     <div class="split-pct">100&thinsp;%</div>
@@ -87,10 +128,17 @@
   </div>
 </div>
 
+
+
+
+
 <div class="section">
-
-
-
+  <div class="section-title">Tagesverlauf &ndash; Klicks gesamt</div>
+  <div class="chart-wrap">
+    <div class="sparkline tall"><div class="sbar" style="height:6%" title="01.07.: 7"></div><div class="sbar" style="height:2%" title="02.07.: 0"></div><div class="sbar" style="height:3%" title="03.07.: 3"></div><div class="sbar" style="height:3%" title="04.07.: 3"></div><div class="sbar" style="height:2%" title="05.07.: 0"></div><div class="sbar" style="height:12%" title="06.07.: 13"></div><div class="sbar" style="height:72%" title="07.07.: 79"></div><div class="sbar" style="height:33%" title="08.07.: 36"></div><div class="sbar" style="height:56%" title="09.07.: 61"></div><div class="sbar" style="height:12%" title="10.07.: 13"></div><div class="sbar" style="height:89%" title="11.07.: 97"></div><div class="sbar" style="height:10%" title="12.07.: 11"></div><div class="sbar" style="height:28%" title="13.07.: 30"></div><div class="sbar" style="height:6%" title="14.07.: 7"></div><div class="sbar" style="height:6%" title="15.07.: 7"></div><div class="sbar" style="height:2%" title="16.07.: 0"></div><div class="sbar" style="height:2%" title="17.07.: 0"></div><div class="sbar" style="height:2%" title="18.07.: 1"></div><div class="sbar" style="height:2%" title="19.07.: 0"></div><div class="sbar" style="height:2%" title="20.07.: 0"></div><div class="sbar" style="height:5%" title="21.07.: 5"></div><div class="sbar" style="height:2%" title="22.07.: 0"></div><div class="sbar" style="height:2%" title="23.07.: 0"></div><div class="sbar" style="height:2%" title="24.07.: 0"></div><div class="sbar" style="height:2%" title="25.07.: 0"></div><div class="sbar" style="height:2%" title="26.07.: 0"></div><div class="sbar" style="height:2%" title="27.07.: 0"></div><div class="sbar" style="height:2%" title="28.07.: 0"></div><div class="sbar" style="height:2%" title="31.07.: 1"></div><div class="sbar" style="height:2%" title="02.08.: 0"></div><div class="sbar" style="height:2%" title="04.08.: 0"></div><div class="sbar" style="height:2%" title="05.08.: 0"></div><div class="sbar" style="height:2%" title="06.08.: 0"></div><div class="sbar" style="height:2%" title="07.08.: 0"></div><div class="sbar" style="height:2%" title="08.08.: 1"></div><div class="sbar" style="height:2%" title="09.08.: 0"></div><div class="sbar" style="height:2%" title="10.08.: 0"></div><div class="sbar" style="height:20%" title="16.08.: 22"></div><div class="sbar" style="height:100%" title="17.08.: 109"></div><div class="sbar" style="height:25%" title="18.08.: 27"></div><div class="sbar" style="height:16%" title="19.08.: 17"></div><div class="sbar" style="height:2%" title="20.08.: 2"></div><div class="sbar" style="height:22%" title="21.08.: 24"></div><div class="sbar" style="height:63%" title="22.08.: 69"></div><div class="sbar" style="height:27%" title="23.08.: 29"></div><div class="sbar" style="height:17%" title="24.08.: 19"></div><div class="sbar" style="height:2%" title="25.08.: 1"></div><div class="sbar" style="height:2%" title="26.08.: 0"></div><div class="sbar" style="height:2%" title="27.08.: 0"></div><div class="sbar" style="height:13%" title="28.08.: 14"></div><div class="sbar" style="height:77%" title="29.08.: 84"></div><div class="sbar" style="height:22%" title="30.08.: 24"></div><div class="sbar" style="height:7%" title="31.08.: 8"></div><div class="sbar" style="height:3%" title="01.09.: 3"></div><div class="sbar" style="height:2%" title="02.09.: 0"></div><div class="sbar" style="height:2%" title="03.09.: 0"></div><div class="sbar" style="height:31%" title="04.09.: 34"></div><div class="sbar" style="height:61%" title="05.09.: 67"></div><div class="sbar" style="height:20%" title="06.09.: 22"></div><div class="sbar" style="height:8%" title="07.09.: 9"></div><div class="sbar" style="height:2%" title="08.09.: 1"></div><div class="sbar" style="height:2%" title="09.09.: 0"></div><div class="sbar" style="height:2%" title="10.09.: 1"></div><div class="sbar" style="height:2%" title="11.09.: 2"></div><div class="sbar" style="height:2%" title="13.09.: 0"></div><div class="sbar" style="height:2%" title="14.09.: 0"></div><div class="sbar" style="height:2%" title="15.09.: 0"></div><div class="sbar" style="height:2%" title="16.09.: 0"></div><div class="sbar" style="height:2%" title="17.09.: 0"></div><div class="sbar" style="height:2%" title="18.09.: 0"></div><div class="sbar" style="height:2%" title="19.09.: 0"></div><div class="sbar" style="height:46%" title="21.09.: 50"></div><div class="sbar" style="height:82%" title="22.09.: 89"></div><div class="sbar" style="height:9%" title="23.09.: 10"></div><div class="sbar" style="height:6%" title="24.09.: 6"></div><div class="sbar" style="height:2%" title="25.09.: 0"></div><div class="sbar" style="height:2%" title="26.09.: 0"></div><div class="sbar" style="height:2%" title="27.09.: 0"></div><div class="sbar" style="height:2%" title="28.09.: 0"></div><div class="sbar" style="height:2%" title="29.09.: 1"></div><div class="sbar" style="height:2%" title="30.09.: 0"></div><div class="sbar" style="height:12%" title="01.10.: 13"></div><div class="sbar" style="height:86%" title="02.10.: 94"></div><div class="sbar" style="height:4%" title="03.10.: 4"></div><div class="sbar" style="height:5%" title="04.10.: 5"></div><div class="sbar" style="height:2%" title="05.10.: 2"></div><div class="sbar" style="height:5%" title="06.10.: 5"></div><div class="sbar" style="height:2%" title="07.10.: 0"></div><div class="sbar" style="height:2%" title="08.10.: 0"></div><div class="sbar" style="height:2%" title="09.10.: 0"></div><div class="sbar" style="height:2%" title="10.10.: 0"></div><div class="sbar" style="height:2%" title="11.10.: 0"></div></div>
+    <div class="axis"><div class="axis-label" style="opacity:1">01.07.</div><div class="axis-label" style="opacity:0">02.07.</div><div class="axis-label" style="opacity:0">03.07.</div><div class="axis-label" style="opacity:0">04.07.</div><div class="axis-label" style="opacity:0">05.07.</div><div class="axis-label" style="opacity:0">06.07.</div><div class="axis-label" style="opacity:0">07.07.</div><div class="axis-label" style="opacity:1">08.07.</div><div class="axis-label" style="opacity:0">09.07.</div><div class="axis-label" style="opacity:0">10.07.</div><div class="axis-label" style="opacity:0">11.07.</div><div class="axis-label" style="opacity:0">12.07.</div><div class="axis-label" style="opacity:0">13.07.</div><div class="axis-label" style="opacity:0">14.07.</div><div class="axis-label" style="opacity:1">15.07.</div><div class="axis-label" style="opacity:0">16.07.</div><div class="axis-label" style="opacity:0">17.07.</div><div class="axis-label" style="opacity:0">18.07.</div><div class="axis-label" style="opacity:0">19.07.</div><div class="axis-label" style="opacity:0">20.07.</div><div class="axis-label" style="opacity:0">21.07.</div><div class="axis-label" style="opacity:1">22.07.</div><div class="axis-label" style="opacity:0">23.07.</div><div class="axis-label" style="opacity:0">24.07.</div><div class="axis-label" style="opacity:0">25.07.</div><div class="axis-label" style="opacity:0">26.07.</div><div class="axis-label" style="opacity:0">27.07.</div><div class="axis-label" style="opacity:0">28.07.</div><div class="axis-label" style="opacity:1">31.07.</div><div class="axis-label" style="opacity:0">02.08.</div><div class="axis-label" style="opacity:0">04.08.</div><div class="axis-label" style="opacity:0">05.08.</div><div class="axis-label" style="opacity:0">06.08.</div><div class="axis-label" style="opacity:0">07.08.</div><div class="axis-label" style="opacity:0">08.08.</div><div class="axis-label" style="opacity:1">09.08.</div><div class="axis-label" style="opacity:0">10.08.</div><div class="axis-label" style="opacity:0">16.08.</div><div class="axis-label" style="opacity:0">17.08.</div><div class="axis-label" style="opacity:0">18.08.</div><div class="axis-label" style="opacity:0">19.08.</div><div class="axis-label" style="opacity:0">20.08.</div><div class="axis-label" style="opacity:1">21.08.</div><div class="axis-label" style="opacity:0">22.08.</div><div class="axis-label" style="opacity:0">23.08.</div><div class="axis-label" style="opacity:0">24.08.</div><div class="axis-label" style="opacity:0">25.08.</div><div class="axis-label" style="opacity:0">26.08.</div><div class="axis-label" style="opacity:0">27.08.</div><div class="axis-label" style="opacity:1">28.08.</div><div class="axis-label" style="opacity:0">29.08.</div><div class="axis-label" style="opacity:0">30.08.</div><div class="axis-label" style="opacity:0">31.08.</div><div class="axis-label" style="opacity:0">01.09.</div><div class="axis-label" style="opacity:0">02.09.</div><div class="axis-label" style="opacity:0">03.09.</div><div class="axis-label" style="opacity:1">04.09.</div><div class="axis-label" style="opacity:0">05.09.</div><div class="axis-label" style="opacity:0">06.09.</div><div class="axis-label" style="opacity:0">07.09.</div><div class="axis-label" style="opacity:0">08.09.</div><div class="axis-label" style="opacity:0">09.09.</div><div class="axis-label" style="opacity:0">10.09.</div><div class="axis-label" style="opacity:1">11.09.</div><div class="axis-label" style="opacity:0">13.09.</div><div class="axis-label" style="opacity:0">14.09.</div><div class="axis-label" style="opacity:0">15.09.</div><div class="axis-label" style="opacity:0">16.09.</div><div class="axis-label" style="opacity:0">17.09.</div><div class="axis-label" style="opacity:0">18.09.</div><div class="axis-label" style="opacity:1">19.09.</div><div class="axis-label" style="opacity:0">21.09.</div><div class="axis-label" style="opacity:0">22.09.</div><div class="axis-label" style="opacity:0">23.09.</div><div class="axis-label" style="opacity:0">24.09.</div><div class="axis-label" style="opacity:0">25.09.</div><div class="axis-label" style="opacity:0">26.09.</div><div class="axis-label" style="opacity:1">27.09.</div><div class="axis-label" style="opacity:0">28.09.</div><div class="axis-label" style="opacity:0">29.09.</div><div class="axis-label" style="opacity:0">30.09.</div><div class="axis-label" style="opacity:0">01.10.</div><div class="axis-label" style="opacity:0">02.10.</div><div class="axis-label" style="opacity:0">03.10.</div><div class="axis-label" style="opacity:1">04.10.</div><div class="axis-label" style="opacity:0">05.10.</div><div class="axis-label" style="opacity:0">06.10.</div><div class="axis-label" style="opacity:0">07.10.</div><div class="axis-label" style="opacity:0">08.10.</div><div class="axis-label" style="opacity:0">09.10.</div><div class="axis-label" style="opacity:0">10.10.</div><div class="axis-label" style="opacity:1">11.10.</div></div>
+  </div>
+</div>
 
 <div class="note">
   Alle Klick-Daten stammen aus Matomo (matomo.mundschenk.de, Site&nbsp;ID&nbsp;14). 

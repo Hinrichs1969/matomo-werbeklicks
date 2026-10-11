@@ -7,22 +7,22 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 720px; margin: 0 auto; }
+         font-size: 13px; color: #1a1a1a; background: #fff; padding: 36px 44px; max-width: 740px; margin: 0 auto; }
   .logo-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; border-bottom:2px solid #e4e7ec; padding-bottom:14px; }
   .logo-text { font-size:15px; font-weight:700; color:#1e40af; letter-spacing:-.01em; }
   .logo-sub  { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; }
   h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
   .subtitle { font-size:12px; color:#6b7280; margin-bottom:24px; }
-  .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
   .kpi { border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px; background:#f8fafc; }
   .kpi-label { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
-  .kpi-value { font-size:26px; font-weight:800; }
+  .kpi-value { font-size:24px; font-weight:800; }
   .kpi-sub   { font-size:10px; color:#9ca3af; margin-top:2px; }
   .section { margin-bottom:24px; }
   .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
                     color:#6b7280; border-bottom:1px solid #e4e7ec; padding-bottom:6px; margin-bottom:12px; }
   .split-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-  .split-label { width:120px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .split-label { width:140px; font-size:12px; font-weight:600; flex-shrink:0; }
   .split-bar   { flex:1; background:#f1f5f9; border-radius:3px; height:12px; overflow:hidden; }
   .split-val   { width:50px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; }
   .split-pct   { width:36px; text-align:right; font-size:11px; color:#9ca3af; }
@@ -34,13 +34,44 @@
                color:#fff; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
                border:none; text-decoration:none; }
   @media print { .print-btn { display:none; } @page { margin:14mm 16mm; size:A4; } }
+  /* Deal-Karten */
+  .deal-card { border:1px solid #e4e7ec; border-radius:10px; padding:14px 16px;
+                margin-bottom:12px; background:#fafafa; page-break-inside:avoid; }
+  .deal-header { margin-bottom:10px; }
+  .deal-title  { font-size:13px; font-weight:700; margin-bottom:3px; }
+  .deal-meta   { font-size:10px; color:#6b7280; }
+  .deal-kpis   { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:8px; }
+  .deal-kpi    { display:flex; flex-direction:column; gap:1px; }
+  .dkl         { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; }
+  .dkv         { font-size:16px; font-weight:700; }
+  .dkv.accent  { color:#6366f1; }
+  .deal-split  { font-size:11px; margin-bottom:8px; }
+  .deal-split-bz  { color:#1d4ed8; font-weight:600; }
+  .deal-split-hk  { color:#16a34a; font-weight:600; }
+  .deal-split-sep { color:#9ca3af; margin:0 4px; }
+  /* Badges */
+  .badge { display:inline-block; font-size:9px; font-weight:700; padding:1px 5px;
+            border-radius:3px; letter-spacing:.04em; vertical-align:middle;
+            margin-left:5px; }
+  .bz-badge   { background:#dbeafe; color:#1d4ed8; }
+  .hk-badge   { background:#dcfce7; color:#16a34a; }
+  .both-badge { background:#f3e8ff; color:#7c3aed; }
+  /* Sparklines */
+  .sparkline-wrap { margin-top:8px; }
+  .spark-note { font-size:10px; color:#6b7280; margin-top:4px; }
+  .sparkline { display:flex; align-items:flex-end; gap:1.5px; height:48px; }
+  .sparkline.tall { height:72px; }
+  .sbar { background:#6366f1; border-radius:1px 1px 0 0; flex:1; cursor:default; }
+  .chart-wrap { }
+  .axis { display:flex; gap:1.5px; margin-top:2px; }
+  .axis-label { flex:1; font-size:7px; color:#9ca3af; text-align:center; overflow:hidden; }
 </style>
 </head>
 <body>
 
 <div class="logo-bar">
   <div>
-    <div class="logo-text">Böhme-Zeitung / Heide-Kurier</div>
+    <div class="logo-text">B&ouml;hme-Zeitung / Heide-Kurier</div>
     <div class="logo-sub">Prenly E-Paper &middot; Online-Werbung</div>
   </div>
 </div>
@@ -48,22 +79,32 @@
 <button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
 
 <h1>Klick-Bericht: viavox.io</h1>
-<p class="subtitle">Zeitraum: 01.07.2026 – 11.10.2026 &middot; Ziel-URL: viavox.io &middot; Stand: 11.10.2026</p>
+<p class="subtitle">Zeitraum: 01.07.2026 &ndash; 11.10.2026 &middot; Ziel-URL: viavox.io &middot; Stand: 11.10.2026</p>
 
 <div class="kpi-grid">
   <div class="kpi">
     <div class="kpi-label">Klicks gesamt</div>
-    <div class="kpi-value">10,123</div>
+    <div class="kpi-value">10,138</div>
     <div class="kpi-sub">seit 01.07.2026</div>
   </div>
   <div class="kpi">
-    <div class="kpi-label">Klickbare Anzeige</div>
-    <div class="kpi-value" style="color:#6366f1">9,357</div>
-    <div class="kpi-sub">replica_box_link_click</div>
+    <div class="kpi-label">Einblendungen</div>
+    <div class="kpi-value" style="color:#64748b">446,460</div>
+    <div class="kpi-sub">replica_box_link_view</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Klickrate (CTR)</div>
+    <div class="kpi-value" style="color:#0891b2">2.1&thinsp;%</div>
+    <div class="kpi-sub">Klicks / Einblendungen</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Unique Leser</div>
+    <div class="kpi-value" style="color:#16a34a">0</div>
+    <div class="kpi-sub">eindeutige Besucher</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Banner / Interstitial</div>
-    <div class="kpi-value" style="color:#0891b2">766</div>
+    <div class="kpi-value" style="color:#0891b2">768</div>
     <div class="kpi-sub">banner_click</div>
   </div>
 </div>
@@ -72,9 +113,9 @@
   <div class="section-title">Verteilung nach Publikation</div>
   
   <div class="split-row">
-    <div class="split-label">Böhme-Zeitung</div>
+    <div class="split-label">B&ouml;hme-Zeitung</div>
     <div class="split-bar"><div style="background:#1d4ed8;height:12px;border-radius:3px;width:100%;min-width:2px"></div></div>
-    <div class="split-val">10,123</div>
+    <div class="split-val">10,138</div>
     <div class="split-pct">100&thinsp;%</div>
   </div>
   <div class="split-row">
@@ -92,98 +133,162 @@
 </div>
 
 <div class="section">
-<div class="section">
   <div class="section-title">Verteilung nach Anzeigenformat</div>
   <div class="split-row">
     <div class="split-label">Klickbare Anzeige</div>
     <div class="split-bar"><div style="background:#6366f1;height:12px;border-radius:3px;width:100%;min-width:2px"></div></div>
-    <div class="split-val">9,357</div>
+    <div class="split-val">9,370</div>
     <div class="split-pct">92&thinsp;%</div>
   </div>
   <div class="split-row">
     <div class="split-label">Banner / Interstitial</div>
     <div class="split-bar"><div style="background:#0891b2;height:12px;border-radius:3px;width:8%;min-width:2px"></div></div>
-    <div class="split-val">766</div>
+    <div class="split-val">768</div>
     <div class="split-pct">8&thinsp;%</div>
   </div>
 </div>
 
 <div class="section">
   <div class="section-title">Klicks nach Anzeige &amp; Erscheinungsdatum</div>
-  <p style="font-size:10px;color:#9ca3af;margin-bottom:10px">
-    Der Zeitraum je Anzeige reicht vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
-    (bzw. heute f&uuml;r die letzte Anzeige). Grundlage: Pipedrive-Deals &amp; Matomo.
+  <p style="font-size:10px;color:#9ca3af;margin:0 0 12px">
+    Zeitraum je Anzeige: vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
+    (letzte Anzeige: bis heute). Grundlage: Pipedrive-Deals&nbsp;&amp;&nbsp;Matomo.
   </p>
-  <table style="width:100%;border-collapse:collapse;font-size:11px">
-    <thead>
-      <tr style="border-bottom:2px solid #e4e7ec;text-align:left">
-        <th style="padding:4px 6px">Anzeige</th>
-        <th style="text-align:center;padding:4px 6px">Erschienen</th>
-        <th style="text-align:center;padding:4px 6px">Messzeitraum</th>
-        <th style="text-align:center;padding:4px 6px">Tage</th>
-        <th style="text-align:right;padding:4px 6px">Klicks</th>
-        <th style="text-align:right;padding:4px 6px">Klickbar</th>
-        <th style="text-align:right">Banner</th>
-        <th style="text-align:right;padding:4px 6px">&#216;/Tag</th>
-      </tr>
-    </thead>
-    <tbody style="border-bottom:1px solid #e4e7ec">
-<tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">31.08.2026</td>
-  <td style="text-align:center;color:#6b7280">31.08.–06.09.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">952</td>
-  <td style="text-align:right;color:#4b5563">937</td>
-  <td style="text-align:right">15</td>
-  <td style="text-align:right;color:#9ca3af">136.0</td>
-</tr><tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">07.09.2026</td>
-  <td style="text-align:center;color:#6b7280">07.09.–13.09.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">1,223</td>
-  <td style="text-align:right;color:#4b5563">1,051</td>
-  <td style="text-align:right">172</td>
-  <td style="text-align:right;color:#9ca3af">174.7</td>
-</tr><tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">14.09.2026</td>
-  <td style="text-align:center;color:#6b7280">14.09.–20.09.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">1,330</td>
-  <td style="text-align:right;color:#4b5563">998</td>
-  <td style="text-align:right">332</td>
-  <td style="text-align:right;color:#9ca3af">190.0</td>
-</tr><tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">21.09.2026</td>
-  <td style="text-align:center;color:#6b7280">21.09.–27.09.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">127</td>
-  <td style="text-align:right;color:#4b5563">70</td>
-  <td style="text-align:right">57</td>
-  <td style="text-align:right;color:#9ca3af">18.1</td>
-</tr><tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">28.09.2026</td>
-  <td style="text-align:center;color:#6b7280">28.09.–04.10.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">1,095</td>
-  <td style="text-align:right;color:#4b5563">1,043</td>
-  <td style="text-align:right">52</td>
-  <td style="text-align:right;color:#9ca3af">156.4</td>
-</tr><tr>
-  <td>Viavox Rätselseite</td>
-  <td style="text-align:center">05.10.2026</td>
-  <td style="text-align:center;color:#6b7280">05.10.–11.10.2026</td>
-  <td style="text-align:center;color:#6b7280">7&thinsp;Tage</td>
-  <td style="text-align:right;font-weight:600">996</td>
-  <td style="text-align:right;color:#4b5563">987</td>
-  <td style="text-align:right">9</td>
-  <td style="text-align:right;color:#9ca3af">142.3</td>
-</tr>    </tbody>
-  </table>
+  <div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 31.08.2026 &middot; Messzeitraum: 31.08.–06.09.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">952</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">43,981</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">2.1&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">136.0</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">952&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:100%" title="31.08.: 200"></div><div class="sbar" style="height:71%" title="01.09.: 142"></div><div class="sbar" style="height:93%" title="02.09.: 186"></div><div class="sbar" style="height:90%" title="03.09.: 180"></div><div class="sbar" style="height:80%" title="04.09.: 160"></div><div class="sbar" style="height:8%" title="05.09.: 16"></div><div class="sbar" style="height:28%" title="06.09.: 55"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>31.08. (200 Klicks)</strong></div>
+  </div>
+</div><div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 07.09.2026 &middot; Messzeitraum: 07.09.–13.09.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">1,223</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">46,877</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">2.2&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">174.7</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">1,223&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:85%" title="07.09.: 215"></div><div class="sbar" style="height:83%" title="08.09.: 211"></div><div class="sbar" style="height:76%" title="09.09.: 194"></div><div class="sbar" style="height:100%" title="10.09.: 254"></div><div class="sbar" style="height:61%" title="11.09.: 154"></div><div class="sbar" style="height:13%" title="12.09.: 32"></div><div class="sbar" style="height:57%" title="13.09.: 146"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>10.09. (254 Klicks)</strong></div>
+  </div>
+</div><div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 14.09.2026 &middot; Messzeitraum: 14.09.–20.09.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">1,330</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">46,515</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">2.1&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">190.0</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">1,330&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:100%" title="14.09.: 393"></div><div class="sbar" style="height:59%" title="15.09.: 232"></div><div class="sbar" style="height:52%" title="16.09.: 206"></div><div class="sbar" style="height:62%" title="17.09.: 243"></div><div class="sbar" style="height:46%" title="18.09.: 182"></div><div class="sbar" style="height:7%" title="19.09.: 26"></div><div class="sbar" style="height:4%" title="20.09.: 17"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>14.09. (393 Klicks)</strong></div>
+  </div>
+</div><div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 21.09.2026 &middot; Messzeitraum: 21.09.–27.09.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">127</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">2,965</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">2.4&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">18.1</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">127&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:16%" title="21.09.: 16"></div><div class="sbar" style="height:2%" title="22.09.: 1"></div><div class="sbar" style="height:4%" title="23.09.: 4"></div><div class="sbar" style="height:6%" title="24.09.: 6"></div><div class="sbar" style="height:2%" title="25.09.: 0"></div><div class="sbar" style="height:2%" title="26.09.: 0"></div><div class="sbar" style="height:100%" title="27.09.: 100"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>27.09. (100 Klicks)</strong></div>
+  </div>
+</div><div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 28.09.2026 &middot; Messzeitraum: 28.09.–04.10.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">1,095</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">53,776</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">1.9&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">156.4</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">1,095&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:90%" title="28.09.: 190"></div><div class="sbar" style="height:79%" title="29.09.: 166"></div><div class="sbar" style="height:100%" title="30.09.: 210"></div><div class="sbar" style="height:71%" title="01.10.: 150"></div><div class="sbar" style="height:77%" title="02.10.: 162"></div><div class="sbar" style="height:29%" title="03.10.: 60"></div><div class="sbar" style="height:50%" title="04.10.: 105"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>30.09. (210 Klicks)</strong></div>
+  </div>
+</div><div class="deal-card">
+  <div class="deal-header">
+    <div class="deal-title">Viavox Rätselseite <span class="badge bz-badge">BZ</span></div>
+    <div class="deal-meta">Erschienen: 05.10.2026 &middot; Messzeitraum: 05.10.–11.10.2026 (7&thinsp;Tage)</div>
+  </div>
+  <div class="deal-kpis">
+    <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">1,011</span></div>
+    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">44,379</span></div>
+    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">2.3&thinsp;%</span></div>
+    
+    <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">144.4</span></div>
+  </div>
+  <div class="deal-split">
+  <span class="deal-split-bz">1,011&thinsp;BZ</span>
+  <span class="deal-split-sep">·</span>
+  <span class="deal-split-hk">0&thinsp;HK</span>
+</div>
+  <div class="sparkline-wrap">
+    <div class="sparkline"><div class="sbar" style="height:100%" title="05.10.: 211"></div><div class="sbar" style="height:83%" title="06.10.: 177"></div><div class="sbar" style="height:88%" title="07.10.: 187"></div><div class="sbar" style="height:100%" title="08.10.: 212"></div><div class="sbar" style="height:87%" title="09.10.: 185"></div><div class="sbar" style="height:6%" title="10.10.: 13"></div><div class="sbar" style="height:7%" title="11.10.: 15"></div></div>
+    <div class="spark-note">Stärkster Tag: <strong>08.10. (212 Klicks)</strong></div>
+  </div>
+</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Tagesverlauf &ndash; Klicks gesamt</div>
+  <div class="chart-wrap">
+    <div class="sparkline tall"><div class="sbar" style="height:14%" title="20.07.: 54"></div><div class="sbar" style="height:40%" title="21.07.: 159"></div><div class="sbar" style="height:37%" title="22.07.: 146"></div><div class="sbar" style="height:42%" title="23.07.: 164"></div><div class="sbar" style="height:41%" title="24.07.: 160"></div><div class="sbar" style="height:4%" title="25.07.: 16"></div><div class="sbar" style="height:8%" title="26.07.: 33"></div><div class="sbar" style="height:2%" title="27.07.: 7"></div><div class="sbar" style="height:28%" title="28.07.: 110"></div><div class="sbar" style="height:50%" title="29.07.: 198"></div><div class="sbar" style="height:48%" title="30.07.: 187"></div><div class="sbar" style="height:45%" title="31.07.: 175"></div><div class="sbar" style="height:4%" title="01.08.: 15"></div><div class="sbar" style="height:8%" title="02.08.: 32"></div><div class="sbar" style="height:32%" title="03.08.: 125"></div><div class="sbar" style="height:51%" title="04.08.: 201"></div><div class="sbar" style="height:46%" title="05.08.: 180"></div><div class="sbar" style="height:47%" title="06.08.: 183"></div><div class="sbar" style="height:38%" title="07.08.: 148"></div><div class="sbar" style="height:5%" title="08.08.: 19"></div><div class="sbar" style="height:12%" title="09.08.: 49"></div><div class="sbar" style="height:52%" title="10.08.: 203"></div><div class="sbar" style="height:45%" title="11.08.: 178"></div><div class="sbar" style="height:32%" title="12.08.: 127"></div><div class="sbar" style="height:46%" title="13.08.: 182"></div><div class="sbar" style="height:41%" title="14.08.: 162"></div><div class="sbar" style="height:5%" title="15.08.: 21"></div><div class="sbar" style="height:6%" title="16.08.: 23"></div><div class="sbar" style="height:8%" title="17.08.: 33"></div><div class="sbar" style="height:2%" title="18.08.: 0"></div><div class="sbar" style="height:3%" title="19.08.: 13"></div><div class="sbar" style="height:2%" title="20.08.: 6"></div><div class="sbar" style="height:2%" title="21.08.: 3"></div><div class="sbar" style="height:12%" title="23.08.: 47"></div><div class="sbar" style="height:54%" title="24.08.: 212"></div><div class="sbar" style="height:41%" title="25.08.: 163"></div><div class="sbar" style="height:41%" title="26.08.: 161"></div><div class="sbar" style="height:47%" title="27.08.: 185"></div><div class="sbar" style="height:33%" title="28.08.: 131"></div><div class="sbar" style="height:4%" title="29.08.: 16"></div><div class="sbar" style="height:15%" title="30.08.: 57"></div><div class="sbar" style="height:51%" title="31.08.: 200"></div><div class="sbar" style="height:36%" title="01.09.: 142"></div><div class="sbar" style="height:47%" title="02.09.: 186"></div><div class="sbar" style="height:46%" title="03.09.: 180"></div><div class="sbar" style="height:41%" title="04.09.: 160"></div><div class="sbar" style="height:4%" title="05.09.: 16"></div><div class="sbar" style="height:14%" title="06.09.: 55"></div><div class="sbar" style="height:55%" title="07.09.: 215"></div><div class="sbar" style="height:54%" title="08.09.: 211"></div><div class="sbar" style="height:49%" title="09.09.: 194"></div><div class="sbar" style="height:65%" title="10.09.: 254"></div><div class="sbar" style="height:39%" title="11.09.: 154"></div><div class="sbar" style="height:8%" title="12.09.: 32"></div><div class="sbar" style="height:37%" title="13.09.: 146"></div><div class="sbar" style="height:100%" title="14.09.: 393"></div><div class="sbar" style="height:59%" title="15.09.: 232"></div><div class="sbar" style="height:52%" title="16.09.: 206"></div><div class="sbar" style="height:62%" title="17.09.: 243"></div><div class="sbar" style="height:46%" title="18.09.: 182"></div><div class="sbar" style="height:7%" title="19.09.: 26"></div><div class="sbar" style="height:4%" title="20.09.: 17"></div><div class="sbar" style="height:4%" title="21.09.: 16"></div><div class="sbar" style="height:2%" title="22.09.: 1"></div><div class="sbar" style="height:2%" title="23.09.: 4"></div><div class="sbar" style="height:2%" title="24.09.: 6"></div><div class="sbar" style="height:2%" title="25.09.: 0"></div><div class="sbar" style="height:2%" title="26.09.: 0"></div><div class="sbar" style="height:25%" title="27.09.: 100"></div><div class="sbar" style="height:48%" title="28.09.: 190"></div><div class="sbar" style="height:42%" title="29.09.: 166"></div><div class="sbar" style="height:53%" title="30.09.: 210"></div><div class="sbar" style="height:38%" title="01.10.: 150"></div><div class="sbar" style="height:41%" title="02.10.: 162"></div><div class="sbar" style="height:15%" title="03.10.: 60"></div><div class="sbar" style="height:27%" title="04.10.: 105"></div><div class="sbar" style="height:54%" title="05.10.: 211"></div><div class="sbar" style="height:45%" title="06.10.: 177"></div><div class="sbar" style="height:48%" title="07.10.: 187"></div><div class="sbar" style="height:54%" title="08.10.: 212"></div><div class="sbar" style="height:47%" title="09.10.: 185"></div><div class="sbar" style="height:3%" title="10.10.: 13"></div><div class="sbar" style="height:4%" title="11.10.: 15"></div></div>
+    <div class="axis"><div class="axis-label" style="opacity:1">20.07.</div><div class="axis-label" style="opacity:0">21.07.</div><div class="axis-label" style="opacity:0">22.07.</div><div class="axis-label" style="opacity:0">23.07.</div><div class="axis-label" style="opacity:0">24.07.</div><div class="axis-label" style="opacity:0">25.07.</div><div class="axis-label" style="opacity:0">26.07.</div><div class="axis-label" style="opacity:1">27.07.</div><div class="axis-label" style="opacity:0">28.07.</div><div class="axis-label" style="opacity:0">29.07.</div><div class="axis-label" style="opacity:0">30.07.</div><div class="axis-label" style="opacity:0">31.07.</div><div class="axis-label" style="opacity:0">01.08.</div><div class="axis-label" style="opacity:0">02.08.</div><div class="axis-label" style="opacity:1">03.08.</div><div class="axis-label" style="opacity:0">04.08.</div><div class="axis-label" style="opacity:0">05.08.</div><div class="axis-label" style="opacity:0">06.08.</div><div class="axis-label" style="opacity:0">07.08.</div><div class="axis-label" style="opacity:0">08.08.</div><div class="axis-label" style="opacity:0">09.08.</div><div class="axis-label" style="opacity:1">10.08.</div><div class="axis-label" style="opacity:0">11.08.</div><div class="axis-label" style="opacity:0">12.08.</div><div class="axis-label" style="opacity:0">13.08.</div><div class="axis-label" style="opacity:0">14.08.</div><div class="axis-label" style="opacity:0">15.08.</div><div class="axis-label" style="opacity:0">16.08.</div><div class="axis-label" style="opacity:1">17.08.</div><div class="axis-label" style="opacity:0">18.08.</div><div class="axis-label" style="opacity:0">19.08.</div><div class="axis-label" style="opacity:0">20.08.</div><div class="axis-label" style="opacity:0">21.08.</div><div class="axis-label" style="opacity:0">23.08.</div><div class="axis-label" style="opacity:0">24.08.</div><div class="axis-label" style="opacity:1">25.08.</div><div class="axis-label" style="opacity:0">26.08.</div><div class="axis-label" style="opacity:0">27.08.</div><div class="axis-label" style="opacity:0">28.08.</div><div class="axis-label" style="opacity:0">29.08.</div><div class="axis-label" style="opacity:0">30.08.</div><div class="axis-label" style="opacity:0">31.08.</div><div class="axis-label" style="opacity:1">01.09.</div><div class="axis-label" style="opacity:0">02.09.</div><div class="axis-label" style="opacity:0">03.09.</div><div class="axis-label" style="opacity:0">04.09.</div><div class="axis-label" style="opacity:0">05.09.</div><div class="axis-label" style="opacity:0">06.09.</div><div class="axis-label" style="opacity:0">07.09.</div><div class="axis-label" style="opacity:1">08.09.</div><div class="axis-label" style="opacity:0">09.09.</div><div class="axis-label" style="opacity:0">10.09.</div><div class="axis-label" style="opacity:0">11.09.</div><div class="axis-label" style="opacity:0">12.09.</div><div class="axis-label" style="opacity:0">13.09.</div><div class="axis-label" style="opacity:0">14.09.</div><div class="axis-label" style="opacity:1">15.09.</div><div class="axis-label" style="opacity:0">16.09.</div><div class="axis-label" style="opacity:0">17.09.</div><div class="axis-label" style="opacity:0">18.09.</div><div class="axis-label" style="opacity:0">19.09.</div><div class="axis-label" style="opacity:0">20.09.</div><div class="axis-label" style="opacity:0">21.09.</div><div class="axis-label" style="opacity:1">22.09.</div><div class="axis-label" style="opacity:0">23.09.</div><div class="axis-label" style="opacity:0">24.09.</div><div class="axis-label" style="opacity:0">25.09.</div><div class="axis-label" style="opacity:0">26.09.</div><div class="axis-label" style="opacity:0">27.09.</div><div class="axis-label" style="opacity:0">28.09.</div><div class="axis-label" style="opacity:1">29.09.</div><div class="axis-label" style="opacity:0">30.09.</div><div class="axis-label" style="opacity:0">01.10.</div><div class="axis-label" style="opacity:0">02.10.</div><div class="axis-label" style="opacity:0">03.10.</div><div class="axis-label" style="opacity:0">04.10.</div><div class="axis-label" style="opacity:0">05.10.</div><div class="axis-label" style="opacity:1">06.10.</div><div class="axis-label" style="opacity:0">07.10.</div><div class="axis-label" style="opacity:0">08.10.</div><div class="axis-label" style="opacity:0">09.10.</div><div class="axis-label" style="opacity:0">10.10.</div><div class="axis-label" style="opacity:0">11.10.</div></div>
+  </div>
 </div>
 
 <div class="note">
