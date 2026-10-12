@@ -181,12 +181,15 @@ def fetch_advertiser_clicks(adv):
     if isinstance(raw, list):
         for e in raw:
             n = e.get("label", "")
-            if n == "replica_box_link_click":
+            if n == "replica_box_link_click" and not has_banner_product:
+                # Bei reinen Banner-/Interstitial-Werbetreibenden ignorieren:
+                # dimension14 ist visit-scoped → fremde replica_box_link_clicks
+                # aus derselben Sitzung würden sonst fälschlich mitgezählt.
                 klickbar = int(e.get("nb_events", 0))
                 uniq     = int(e.get("nb_uniq_visitors", 0))
             if n == "banner_click" and has_banner_product:
                 banner = int(e.get("nb_events", 0))
-            if n == "replica_box_link_view":
+            if n == "replica_box_link_view" and not has_banner_product:
                 views = int(e.get("nb_events", 0))
     return adv["key"], {"klickbar": klickbar, "banner": banner, "total": klickbar + banner,
                         "views": views, "uniq": uniq}
@@ -266,12 +269,12 @@ def fetch_deal_clicks(seg, date_from, date_to, has_banner):
     if isinstance(raw, list):
         for e in raw:
             n = e.get("label", "")
-            if n == "replica_box_link_click":
+            if n == "replica_box_link_click" and not has_banner:
                 klickbar = int(e.get("nb_events", 0))
                 uniq     = int(e.get("nb_uniq_visitors", 0))
             if n == "banner_click" and has_banner:
                 banner = int(e.get("nb_events", 0))
-            if n == "replica_box_link_view":
+            if n == "replica_box_link_view" and not has_banner:
                 views = int(e.get("nb_events", 0))
     return {"klickbar": klickbar, "banner": banner, "total": klickbar + banner,
             "views": views, "uniq": uniq}
@@ -305,11 +308,11 @@ def fetch_advertiser_daily(adv):
             if isinstance(events, list):
                 for e in events:
                     n = e.get("label", "")
-                    if n == "replica_box_link_click":
+                    if n == "replica_box_link_click" and not has_banner:
                         klicks += int(e.get("nb_events", 0))
                     if n == "banner_click" and has_banner:
                         klicks += int(e.get("nb_events", 0))
-                    if n == "replica_box_link_view":
+                    if n == "replica_box_link_view" and not has_banner:
                         views += int(e.get("nb_events", 0))
             if klicks or views:
                 result[date_str] = {"klicks": klicks, "views": views}
