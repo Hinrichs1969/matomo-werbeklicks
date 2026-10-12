@@ -71,6 +71,10 @@ ADVERTISERS = [
     {"key": "olaf_meyer",     "pub": "BZ", "pipedrive_org_id": 3453,   "name": "Garten- u. Landschaftsbau Meyer","url": "meyer-gartenbau-soltau.de",      "seg": "dimension14%3D%40meyer-gartenbau-soltau.de",                                                                                                                                   "utm": False, "klaeren": True,  "banner": True },
     {"key": "msm_walsrode",   "pub": "BZ", "pipedrive_org_id": 18291,   "name": "MSM Walsrode",                   "url": "msm-walsrode.com",               "seg": "dimension14%3D%40msm-walsrode.com",                                                                                                                                             "utm": False, "klaeren": True },
     {"key": "heidekreis",     "pub": "BZ", "pipedrive_org_id": 2489,   "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
+    # Interstitials OHNE onclick-Code → banner_click via dimension14 noch nicht messbar
+    # Sobald onclick-Code im Prenly-Interstitial eingebaut ist, kommen automatisch Daten
+    {"key": "volksbank",      "pub": "BZ", "pipedrive_org_id": 385,    "name": "Volksbank Lüneburger Heide",     "url": "vblh.de",                        "seg": "dimension14%3D%40vblh.de",                                                                                                                                                      "utm": False, "klaeren": False, "banner": True},
+    {"key": "mediclin",       "pub": "BZ", "pipedrive_org_id": 3500,   "name": "MediClin Klinikum Soltau",       "url": "klinikum-soltau.de",             "seg": "dimension14%3D%40klinikum-soltau.de",                                                                                                                                           "utm": False, "klaeren": False, "banner": True},
 ]
 
 
