@@ -73,8 +73,8 @@ ADVERTISERS = [
     {"key": "heidekreis",     "pub": "BZ", "pipedrive_org_id": 2489,   "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
     # Interstitials OHNE onclick-Code → banner_click via dimension14 noch nicht messbar
     # Sobald onclick-Code im Prenly-Interstitial eingebaut ist, kommen automatisch Daten
-    {"key": "volksbank",      "pub": "BZ", "pipedrive_org_id": 385,    "name": "Volksbank Lüneburger Heide",     "url": "vblh.de",                        "seg": "dimension14%3D%40vblh.de",                                                                                                                                                      "utm": False, "klaeren": False, "banner": True},
-    {"key": "mediclin",       "pub": "BZ", "pipedrive_org_id": 3500,   "name": "MediClin Klinikum Soltau",       "url": "klinikum-soltau.de",             "seg": "dimension14%3D%40klinikum-soltau.de",                                                                                                                                           "utm": False, "klaeren": False, "banner": True},
+    {"key": "volksbank",      "pub": "BZ", "pipedrive_org_id": 385,    "name": "Volksbank Lüneburger Heide",     "url": "vblh.de",                        "seg": "dimension14%3D%40vblh.de",                                                                                                                                                      "utm": False, "klaeren": False, "banner": True, "no_onclick": True},
+    {"key": "mediclin",       "pub": "BZ", "pipedrive_org_id": 3500,   "name": "MediClin Klinikum Soltau",       "url": "klinikum-soltau.de",             "seg": "dimension14%3D%40klinikum-soltau.de",                                                                                                                                           "utm": False, "klaeren": False, "banner": True, "no_onclick": True},
 ]
 
 
@@ -317,6 +317,24 @@ def fetch_advertiser_daily(adv):
             if klicks or views:
                 result[date_str] = {"klicks": klicks, "views": views}
     return adv["key"], result
+
+
+def fetch_all_pub_opens():
+    """Tägliche E-Paper-Öffnungen (gesamt, ohne Segment) für den gesamten Messzeitraum.
+    Wird als Reichweiten-Proxy für Interstitial-/Banner-Kunden verwendet."""
+    raw = matomo_post({
+        "module": "API", "method": "Events.getName",
+        "period": "day", "date": f"{START},{TODAY}",
+        "filter_limit": "10",
+    }, retries=1, backoff=5)
+    result = {}  # {date_str: int}
+    if isinstance(raw, dict):
+        for date_str, events in raw.items():
+            if isinstance(events, list):
+                for e in events:
+                    if e.get("label") == "publication_open":
+                        result[date_str] = int(e.get("nb_events", 0))
+    return result
 
 
 def js_bool(v):
@@ -706,13 +724,56 @@ def generate_customer_html(adv, clicks):
     banner   = clicks.get("banner", 0)
     views    = clicks.get("views", 0)
     has_banner_product = adv.get("banner", False)
+
+    # Hinweisseite für Banner-Kunden ohne onclick-Code (keine Klicks messbar)
+    if adv.get("no_onclick") and total == 0:
+        return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klick-Bericht: {name}</title>
+<style>
+  body {{ font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b;
+         display: flex; align-items: center; justify-content: center;
+         min-height: 100vh; margin: 0; }}
+  .card {{ background: #fff; border-radius: 12px; padding: 40px 48px; max-width: 560px;
+           box-shadow: 0 2px 16px rgba(0,0,0,.08); text-align: center; }}
+  h1 {{ font-size: 20px; margin: 0 0 8px; }}
+  .sub {{ color: #64748b; font-size: 14px; margin-bottom: 28px; }}
+  .icon {{ font-size: 48px; margin-bottom: 16px; }}
+  .info {{ background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+           padding: 16px; font-size: 13px; line-height: 1.6; text-align: left; }}
+  .info strong {{ color: #1d4ed8; }}
+  .step {{ margin-top: 12px; padding-top: 12px; border-top: 1px solid #dbeafe; font-size: 12px; color: #6b7280; }}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">&#128683;</div>
+  <h1>Klick-Messung nicht aktiv</h1>
+  <p class="sub">{name} &middot; {url_disp} &middot; Stand: {TODAY_DE}</p>
+  <div class="info">
+    <strong>Warum gibt es keine Klickdaten?</strong><br>
+    Das Interstitial dieses Kunden enth&auml;lt noch keinen Matomo-Tracking-Code
+    (onclick-Code). Klicks auf das Banner werden daher nicht in Matomo erfasst.<br>
+    <div class="step">
+      <strong>N&auml;chster Schritt:</strong> Den onclick-Code gem&auml;&szlig; Dokumentation
+      (<em>Matomo-onclick-Code_Interstitials.md</em>) in das Interstitial-HTML einbauen.
+      Ab der n&auml;chsten Erscheinung werden Klicks automatisch gemessen.
+    </div>
+  </div>
+</div>
+</body>
+</html>"""
     bz_raw   = clicks.get("bz")
     hk_raw   = clicks.get("hk")
     split_available = bz_raw is not None and hk_raw is not None
     bz  = bz_raw if split_available else 0
     hk  = hk_raw if split_available else 0
     mag = max(0, total - bz - hk) if split_available else 0
-    daily_data = clicks.get("daily", {})  # {date_str: {klicks, views}}
+    daily_data = clicks.get("daily", {})   # {date_str: {klicks, views}}
+    pub_open   = clicks.get("pub_open", 0) # E-Paper-Öffnungen (Reichweite Banner)
 
     # ---- Deutsche Zahlenformatierung ----
     def fmt(n):
@@ -724,15 +785,28 @@ def generate_customer_html(adv, clicks):
         s = f"{n:.{d}f}"
         return s.replace(".", ",")
 
-    # CTR (Klickrate) = Klicks / Einblendungen
-    ctr_val = (klickbar / views * 100) if views else None
-    ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+    # Frühestes Deal-Datum → Kampagnenstart für diesen Kunden
+    deals_list = clicks.get("deals", [])
+    if deals_list:
+        earliest_deal_str = min(dr["date_from"] for dr in deals_list)
+        campaign_start_d  = datetime.datetime.strptime(earliest_deal_str, "%Y-%m-%d").date()
+    else:
+        campaign_start_d  = datetime.date(2026, 7, 1)
+    campaign_start_de = campaign_start_d.strftime("%d.%m.%Y")
 
-    # Ø Klicks pro Tag (Gesamtzeitraum seit 01.07.)
-    start_d  = datetime.date(2026, 7, 1)
-    today_d  = datetime.date.today()
-    total_days = (today_d - start_d).days + 1
-    avg_day  = fmt_dec(total / total_days) if total_days else "–"
+    today_d    = datetime.date.today()
+    total_days = (today_d - campaign_start_d).days + 1
+
+    # CTR (Klickrate): bei Klickbar-Kunden = klickbar/views, bei Banner = banner/pub_open
+    if has_banner_product:
+        ctr_val = (banner / pub_open * 100) if pub_open else None
+        ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+    else:
+        ctr_val = (klickbar / views * 100) if views else None
+        ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+
+    # Ø Klicks pro Tag (ab Kampagnenstart des Kunden, nicht starr 01.07.)
+    avg_day = fmt_dec(total / total_days) if total_days else "–"
 
     def pct(v):
         return f"{(v / total * 100):.0f}" if total else "–"
@@ -771,12 +845,12 @@ def generate_customer_html(adv, clicks):
   </div>"""
         format_split_section = f"""<div class="section">
   <div class="section-title">Verteilung nach Anzeigenformat</div>
-  <div class="split-row">
+  {f'''<div class="split-row">
     <div class="split-label">Klickbare Anzeige</div>
     <div class="split-bar">{bar(klickbar, max(klickbar, banner, 1), "#6366f1")}</div>
     <div class="split-val">{fmt(klickbar)}</div>
     <div class="split-pct">{pct(klickbar)}&thinsp;%</div>
-  </div>
+  </div>''' if klickbar > 0 else ""}
   <div class="split-row">
     <div class="split-label">Banner / Interstitial</div>
     <div class="split-bar">{bar(banner, max(klickbar, banner, 1), "#0891b2")}</div>
@@ -788,8 +862,6 @@ def generate_customer_html(adv, clicks):
         kpi_grid_cols = "repeat(3,1fr)"
         banner_kpi_block = ""
         format_split_section = ""
-
-    # ---- Deal-Karten (pro Anzeige mit Sparkline) ----
     deals = clicks.get("deals", [])
     deal_cards_html = ""
     if deals:
@@ -798,6 +870,7 @@ def generate_customer_html(adv, clicks):
             db  = dr.get("banner", 0)
             dt  = dr.get("total", 0)
             dv  = dr.get("views", 0)
+            dpub_open = dr.get("pub_open", 0)
             dbz = dr.get("bz")
             dhk = dr.get("hk")
             title_short = dr["title"][:60] + ("…" if len(dr["title"]) > 60 else "")
@@ -805,7 +878,11 @@ def generate_customer_html(adv, clicks):
             date_to_d   = datetime.datetime.strptime(dr["date_to"],   "%Y-%m-%d")
             days = (date_to_d - date_from_d).days + 1
             ctr_day  = fmt_dec(dt / days) if days > 0 else "–"
-            deal_ctr = f"{fmt_dec(dk / dv * 100)}&thinsp;%" if dv else "–"
+            # CTR: Banner-Kunden = banner/pub_open, Klickbar = klickbar/views
+            if has_banner_product:
+                deal_ctr = f"{fmt_dec(db / dpub_open * 100)}&thinsp;%" if dpub_open else "–"
+            else:
+                deal_ctr = f"{fmt_dec(dk / dv * 100)}&thinsp;%" if dv else "–"
             no_data  = (dt == 0)
 
             # Ausgabe-Badge
@@ -864,7 +941,7 @@ def generate_customer_html(adv, clicks):
   {no_data_note}
   <div class="deal-kpis">
     <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{fmt(dt)}</span></div>
-    <div class="deal-kpi"><span class="dkl">Einblendungen</span><span class="dkv">{fmt(dv)}</span></div>
+    <div class="deal-kpi"><span class="dkl">{"Reichweite" if has_banner_product else "Einblendungen"}</span><span class="dkv">{fmt(dpub_open) if has_banner_product else fmt(dv)}</span></div>
     <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">{deal_ctr}</span></div>
     <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">{ctr_day}</span></div>
   </div>
@@ -992,23 +1069,23 @@ def generate_customer_html(adv, clicks):
 <button class="print-btn" onclick="window.print()">&#128438; Als PDF speichern / Drucken</button>
 
 <h1>Klick-Bericht: {name}</h1>
-<p class="subtitle">Zeitraum: 01.07.2026 &ndash; {TODAY_DE} &middot; Ziel-URL: {url_disp} &middot; Stand: {TODAY_DE}</p>
+<p class="subtitle">Zeitraum: {campaign_start_de} &ndash; {TODAY_DE} &middot; Ziel-URL: {url_disp} &middot; Stand: {TODAY_DE}</p>
 
 <div class="kpi-grid">
   <div class="kpi">
     <div class="kpi-label">Klicks gesamt</div>
     <div class="kpi-value">{fmt(total)}</div>
-    <div class="kpi-sub">seit 01.07.2026</div>
+    <div class="kpi-sub">seit {campaign_start_de}</div>
   </div>
   <div class="kpi">
-    <div class="kpi-label">Einblendungen</div>
-    <div class="kpi-value" style="color:#64748b">{fmt(views)}</div>
-    <div class="kpi-sub">replica_box_link_view</div>
+    <div class="kpi-label">{"Reichweite (&#214;ffnungen)" if has_banner_product else "Einblendungen"}</div>
+    <div class="kpi-value" style="color:#64748b">{fmt(pub_open) if has_banner_product else fmt(views)}</div>
+    <div class="kpi-sub">{"publication_open" if has_banner_product else "replica_box_link_view"}</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Klickrate (CTR)</div>
     <div class="kpi-value" style="color:#0891b2">{ctr_pct}</div>
-    <div class="kpi-sub">Klicks / Einblendungen</div>
+    <div class="kpi-sub">{"Banner / &#214;ffnungen" if has_banner_product else "Klicks / Einblendungen"}</div>
   </div>
 {banner_kpi_block}
 </div>
@@ -1158,24 +1235,44 @@ def main():
         for a in ADVERTISERS:
             deal_clicks_raw[a["key"]] = deal_results_raw.get(a["key"], [])
 
+        # Publication_open-Daten einmalig holen (für Banner/Interstitial-Reichweite)
+        log("Hole E-Paper-Öffnungen (publication_open, kein Segment)...")
+        pub_opens_daily = fetch_all_pub_opens()
+        log(f"  publication_open: {sum(pub_opens_daily.values())} Öffnungen in {len(pub_opens_daily)} Tagen")
+
         adv_clicks = {}
         for a in ADVERTISERS:
             raw  = adv_clicks_raw.get(a["key"], {"klickbar": 0, "banner": 0, "total": 0, "views": 0, "uniq": 0})
             # Gesamtbericht-Split: nutzt Advertiser-Publikation (BZ/HK/both)
             split = compute_bz_hk_split(raw["total"], a.get("pub", "both"))
             # Per-Deal: wende Deal-Ausgabe an (überschreibt Advertiser-pub wenn bekannt)
+            # Pro Banner-Deal: pub_open = Summe E-Paper-Öffnungen im Deal-Zeitraum
             deals = []
             for dr in deal_results_raw.get(a["key"], []):
                 deal_pub = dr.get("ausgabe") or a.get("pub", "both")
                 dsplit = compute_bz_hk_split(dr.get("total", 0), deal_pub)
-                deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"]})
+                deal_pub_open = 0
+                if a.get("banner"):
+                    deal_pub_open = sum(
+                        cnt for ds, cnt in pub_opens_daily.items()
+                        if dr["date_from"] <= ds <= dr["date_to"]
+                    )
+                deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"], "pub_open": deal_pub_open})
             deals.sort(key=lambda x: x["datum"])
+            # Gesamte Reichweite für Banner-Kunden (ab frühestem Deal bis heute)
+            banner_pub_open = 0
+            if a.get("banner") and deals:
+                earliest = min(dr["date_from"] for dr in deals)
+                banner_pub_open = sum(cnt for ds, cnt in pub_opens_daily.items() if ds >= earliest)
+            elif a.get("banner"):
+                banner_pub_open = sum(pub_opens_daily.values())
             adv_clicks[a["key"]] = {
                 **raw,
-                "bz":    split["bz"],
-                "hk":    split["hk"],
-                "deals": deals,
-                "daily": adv_daily_raw.get(a["key"], {}),
+                "bz":       split["bz"],
+                "hk":       split["hk"],
+                "deals":    deals,
+                "daily":    adv_daily_raw.get(a["key"], {}),
+                "pub_open": banner_pub_open,
             }
             c = adv_clicks[a["key"]]
             log(f"  {a['key']}: gesamt={c['total']} klickbar={c['klickbar']} banner={c['banner']} BZ={c['bz']} HK={c['hk']} views={c['views']} uniq={c['uniq']}")
