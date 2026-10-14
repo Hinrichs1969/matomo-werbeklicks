@@ -727,6 +727,45 @@ def generate_customer_html(adv, clicks):
 
     # Hinweisseite für Banner-Kunden ohne onclick-Code (keine Klicks messbar)
     if adv.get("no_onclick") and total == 0:
+        # Reichweite-Tabelle aus Deal-Daten aufbauen
+        no_onclick_deals = clicks.get("deals", [])
+        pub_open_total   = clicks.get("pub_open", 0)
+
+        def _fmt(n):
+            return f"{int(n):,}".replace(",", ".")
+
+        if no_onclick_deals:
+            reach_rows = ""
+            for dr in no_onclick_deals:
+                dp = dr.get("pub_open", 0)
+                reach_rows += f"""<tr>
+  <td>{dr.get("datum_de","–")}</td>
+  <td>{dr.get("title","")[:45]}</td>
+  <td style="text-align:right;font-weight:600">{_fmt(dp)}</td>
+</tr>"""
+            reach_table = f"""<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:16px;text-align:left">
+  <thead>
+    <tr style="border-bottom:2px solid #e2e8f0;color:#64748b">
+      <th style="padding:6px 8px">Erscheinung</th>
+      <th style="padding:6px 8px">Anzeige</th>
+      <th style="padding:6px 8px;text-align:right">Reichweite</th>
+    </tr>
+  </thead>
+  <tbody>
+    {reach_rows}
+    <tr style="border-top:2px solid #e2e8f0;font-weight:700">
+      <td colspan="2" style="padding:6px 8px">Gesamt</td>
+      <td style="padding:6px 8px;text-align:right">{_fmt(pub_open_total)}</td>
+    </tr>
+  </tbody>
+</table>
+<p style="font-size:11px;color:#94a3b8;margin:8px 0 0">
+  Reichweite = Anzahl E-Paper-&Ouml;ffnungen im jeweiligen Erscheinungszeitraum
+  (publication_open-Events in Matomo, beide Ausgaben).
+</p>"""
+        else:
+            reach_table = '<p style="font-size:12px;color:#64748b;margin-top:12px">Keine Pipedrive-Deals mit Erscheinungsdatum gefunden.</p>'
+
         return f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -736,16 +775,21 @@ def generate_customer_html(adv, clicks):
 <style>
   body {{ font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b;
          display: flex; align-items: center; justify-content: center;
-         min-height: 100vh; margin: 0; }}
-  .card {{ background: #fff; border-radius: 12px; padding: 40px 48px; max-width: 560px;
-           box-shadow: 0 2px 16px rgba(0,0,0,.08); text-align: center; }}
-  h1 {{ font-size: 20px; margin: 0 0 8px; }}
-  .sub {{ color: #64748b; font-size: 14px; margin-bottom: 28px; }}
-  .icon {{ font-size: 48px; margin-bottom: 16px; }}
+         min-height: 100vh; margin: 0; padding: 24px; box-sizing: border-box; }}
+  .card {{ background: #fff; border-radius: 12px; padding: 36px 44px; max-width: 620px;
+           width: 100%; box-shadow: 0 2px 16px rgba(0,0,0,.08); }}
+  h1 {{ font-size: 20px; margin: 0 0 4px; }}
+  .sub {{ color: #64748b; font-size: 13px; margin-bottom: 24px; }}
+  .icon {{ font-size: 40px; margin-bottom: 12px; }}
   .info {{ background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
-           padding: 16px; font-size: 13px; line-height: 1.6; text-align: left; }}
+           padding: 14px 16px; font-size: 13px; line-height: 1.6; }}
   .info strong {{ color: #1d4ed8; }}
-  .step {{ margin-top: 12px; padding-top: 12px; border-top: 1px solid #dbeafe; font-size: 12px; color: #6b7280; }}
+  .step {{ margin-top: 10px; padding-top: 10px; border-top: 1px solid #dbeafe;
+           font-size: 12px; color: #6b7280; }}
+  .reach {{ background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+            padding: 14px 16px; margin-top: 20px; }}
+  .reach-title {{ font-size: 13px; font-weight: 700; color: #15803d; margin-bottom: 4px; }}
+  table td, table th {{ padding: 6px 8px; border-bottom: 1px solid #e2e8f0; }}
 </style>
 </head>
 <body>
@@ -756,12 +800,19 @@ def generate_customer_html(adv, clicks):
   <div class="info">
     <strong>Warum gibt es keine Klickdaten?</strong><br>
     Das Interstitial dieses Kunden enth&auml;lt noch keinen Matomo-Tracking-Code
-    (onclick-Code). Klicks auf das Banner werden daher nicht in Matomo erfasst.<br>
+    (onclick-Code). Klicks auf das Banner werden daher nicht in Matomo erfasst.
     <div class="step">
       <strong>N&auml;chster Schritt:</strong> Den onclick-Code gem&auml;&szlig; Dokumentation
       (<em>Matomo-onclick-Code_Interstitials.md</em>) in das Interstitial-HTML einbauen.
       Ab der n&auml;chsten Erscheinung werden Klicks automatisch gemessen.
     </div>
+  </div>
+  <div class="reach">
+    <div class="reach-title">&#128202; Reichweite (E-Paper-&Ouml;ffnungen)</div>
+    <p style="font-size:12px;color:#166534;margin:0 0 8px">
+      Auch ohne Klick-Tracking ist die Reichweite der Interstitials messbar.
+    </p>
+    {reach_table}
   </div>
 </div>
 </body>
@@ -1268,17 +1319,25 @@ def main():
                 dsplit = compute_bz_hk_split(dr.get("total", 0), deal_pub)
                 deal_pub_open = 0
                 if a.get("banner"):
-                    deal_pub_open = sum(
-                        cnt for ds, cnt in pub_opens_daily.items()
-                        if dr["date_from"] <= ds <= dr["date_to"]
-                    )
+                    if a.get("no_onclick"):
+                        # Interstitial: Reichweite = nur Erscheinungstag (eine Edition)
+                        deal_pub_open = pub_opens_daily.get(dr["date_from"], 0)
+                    else:
+                        deal_pub_open = sum(
+                            cnt for ds, cnt in pub_opens_daily.items()
+                            if dr["date_from"] <= ds <= dr["date_to"]
+                        )
                 deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"], "pub_open": deal_pub_open})
             deals.sort(key=lambda x: x["datum"])
-            # Gesamte Reichweite für Banner-Kunden (ab frühestem Deal bis heute)
+            # Gesamte Reichweite für Banner-Kunden
             banner_pub_open = 0
             if a.get("banner") and deals:
-                earliest = min(dr["date_from"] for dr in deals)
-                banner_pub_open = sum(cnt for ds, cnt in pub_opens_daily.items() if ds >= earliest)
+                if a.get("no_onclick"):
+                    # Interstitial: Summe der einzelnen Erscheinungstage
+                    banner_pub_open = sum(dr.get("pub_open", 0) for dr in deals)
+                else:
+                    earliest = min(dr["date_from"] for dr in deals)
+                    banner_pub_open = sum(cnt for ds, cnt in pub_opens_daily.items() if ds >= earliest)
             elif a.get("banner"):
                 banner_pub_open = sum(pub_opens_daily.values())
             adv_clicks[a["key"]] = {
