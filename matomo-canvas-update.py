@@ -949,16 +949,29 @@ def generate_customer_html(adv, clicks):
   {sparkline_html}
 </div>"""
 
+        # Unzugeordnete Klicks: Differenz Gesamtklicks vs. Summe aller Deal-Klicks
+        sum_deal_clicks = sum(dr.get("total", 0) for dr in deals)
+        unassigned = total - sum_deal_clicks
+        if unassigned > 3:
+            unassigned_warning = f"""<div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;
+  padding:12px 16px;margin-bottom:12px;font-size:11px;color:#713f12;line-height:1.5">
+  <strong>&#9888; {fmt(unassigned)} Klicks keinem Deal zugeordnet</strong><br>
+  Matomo z&auml;hlt {fmt(total)} Klicks gesamt, die Deal-Karten ergeben aber nur {fmt(sum_deal_clicks)}.
+  Wahrscheinliche Ursache: Erscheinungsdatum in einem Pipedrive-Deal fehlt oder eine
+  Anzeige hat noch keinen Klickbar-Deal in Pipeline Sonstiges. Bitte Pipedrive pr&uuml;fen.
+</div>"""
+        else:
+            unassigned_warning = ""
+
         deals_section = f"""<div class="section">
   <div class="section-title">Klicks nach Anzeige &amp; Erscheinungsdatum</div>
   <p style="font-size:10px;color:#9ca3af;margin:0 0 12px">
     Zeitraum je Anzeige: vom Erscheinungsdatum bis zum Tag vor der n&auml;chsten Buchung
     (letzte Anzeige: bis heute). Grundlage: Pipedrive-Deals&nbsp;&amp;&nbsp;Matomo.
   </p>
+  {unassigned_warning}
   {deal_cards_html}
 </div>"""
-    else:
-        deals_section = ""
 
     # Gesamt-Tagesverlauf (alle Klicks)
     if daily_data:
