@@ -972,6 +972,8 @@ def generate_customer_html(adv, clicks):
   {unassigned_warning}
   {deal_cards_html}
 </div>"""
+    else:
+        deals_section = ""
 
     # Gesamt-Tagesverlauf (alle Klicks)
     if daily_data:
