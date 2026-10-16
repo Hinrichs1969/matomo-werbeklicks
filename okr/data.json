@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-15T06:38:22",
+  "generated_at": "2026-10-16T06:36:56",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 5553.41,
-  "progress_pct": 13.9,
-  "remaining": 34446.59,
-  "deal_count": 79,
+  "total_db": 5611.41,
+  "progress_pct": 14.0,
+  "remaining": 34388.59,
+  "deal_count": 80,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -14,9 +14,9 @@
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 62,
-      "db": 4530.9,
-      "value": 5106.0,
+      "n": 63,
+      "db": 4588.9,
+      "value": 5164.0,
       "missing_db": 1
     },
     "online_anzeigen": {
@@ -124,23 +124,23 @@
     {
       "week": "W42",
       "vermittlungen": 0.0,
-      "sonstige_rest": 58.0,
+      "sonstige_rest": 116.0,
       "online_anzeigen": 0.0,
-      "total": 58.0
+      "total": 116.0
     }
   ],
   "process": {
-    "activities_total": 644,
-    "deals_created_total": 419,
+    "activities_total": 648,
+    "deals_created_total": 421,
     "deals_by_status": {
       "open": 166,
-      "won": 82,
-      "lost": 171
+      "won": 83,
+      "lost": 172
     },
     "conversion": {
-      "to_deal_pct": 65.1,
-      "to_won_pct": 12.7,
-      "win_rate_pct": 32.4,
+      "to_deal_pct": 65.0,
+      "to_won_pct": 12.8,
+      "win_rate_pct": 32.5,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -198,7 +198,7 @@
       },
       {
         "week": "W42",
-        "count": 60
+        "count": 64
       }
     ],
     "weekly_deals": [
@@ -281,9 +281,9 @@
       },
       {
         "week": "W40",
-        "open": 29,
+        "open": 28,
         "won": 5,
-        "lost": 33,
+        "lost": 34,
         "total": 67
       },
       {
@@ -295,10 +295,10 @@
       },
       {
         "week": "W42",
-        "open": 28,
-        "won": 2,
+        "open": 29,
+        "won": 3,
         "lost": 2,
-        "total": 32
+        "total": 34
       }
     ],
     "weekly_conversion": [
@@ -408,11 +408,11 @@
       },
       {
         "week": "W42",
-        "activities": 60,
-        "deals_created": 32,
-        "won": 2,
-        "to_deal_pct": 53.3,
-        "to_won_pct": 3.3
+        "activities": 64,
+        "deals_created": 34,
+        "won": 3,
+        "to_deal_pct": 53.1,
+        "to_won_pct": 4.7
       }
     ]
   },
