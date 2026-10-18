@@ -1,7 +1,8 @@
-# Matomo-Tracking für Interstitials – onclick-Code
+# Matomo-Tracking – onclick-Codes für klickbare Anzeigen & Interstitials
 
 **Stand:** Oktober 2026  
-**Betrifft:** Volksbank Lüneburger Heide eG und MediClin Klinikum Soltau
+**Betrifft:** Volksbank Lüneburger Heide eG, MediClin Klinikum Soltau,  
+Kahnwald Optik-Hörgeräte, MSM Walsrode GmbH & Co. KG, Grube KG Forstgerätestelle
 
 ---
 
@@ -106,3 +107,82 @@ Sobald der onclick-Code eingebaut ist:
 Die Reichweite (E-Paper-Öffnungen) wurde aus dem `publication_open`-Event in Matomo ermittelt
 und entspricht der Anzahl der Sitzungen, in denen das E-Paper geöffnet wurde.  
 Klickzahlen für vergangene Schaltungen können nachträglich **nicht mehr** ermittelt werden.
+
+---
+
+## Klickbare Anzeigen – fehlende onclick-Codes (Stand Oktober 2026)
+
+Bei klickbaren Anzeigen (nicht Interstitials) trägt die Grafik in Prenly beim
+Anlegen des klickbaren Bereichs das **onclick-Feld** aus. Ohne diesen Code werden
+weder Klicks noch Einblendungen in Matomo erfasst.
+
+### Kahnwald Optik-Hörgeräte
+
+**Anzeige:** Senioren heute (HK, erschienen 11.10.2026)  
+**Ziel-URL:** `https://www.optikkahnwald.de` *(bitte genaue URL mit Grafik klären)*
+
+**onclick-Code für Prenly:**
+```javascript
+var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.optikkahnwald.de']);
+```
+
+Als `<a href>` (falls Prenly-Link-Feld genutzt wird):
+```html
+<a href="https://www.optikkahnwald.de"
+   target="_blank"
+   onclick="var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.optikkahnwald.de']);">
+</a>
+```
+
+> **Hinweis:** Im Tracking-System ist die Domain `optikkahnwald.de` hinterlegt.  
+> Die genaue Ziel-URL (mit oder ohne `www.`, mit oder ohne Unterseite) muss mit der
+> tatsächlichen Zielseite der Anzeige übereinstimmen.
+
+---
+
+### MSM Walsrode GmbH & Co. KG
+
+**Anzeige:** BZ Ausbildung 2026 (BZ, erschienen 12.09.2026)  
+**Ziel-URL:** `https://www.msm-walsrode.com` *(bitte genaue URL mit Grafik klären)*
+
+**onclick-Code für Prenly:**
+```javascript
+var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.msm-walsrode.com']);
+```
+
+Als `<a href>`:
+```html
+<a href="https://www.msm-walsrode.com"
+   target="_blank"
+   onclick="var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.msm-walsrode.com']);">
+</a>
+```
+
+> **Hinweis:** Die Anzeige läuft bereits seit 12.09. (über 30 Tage). Sobald der Code
+> eingetragen ist, werden ab dem nächsten Erscheinungstag Klicks erfasst.
+> Vergangene Klicks sind nicht mehr rekonstruierbar.
+
+---
+
+### Grube KG Forstgerätestelle
+
+**Anzeige:** CrossSell Print+Online (BZ+HK, erschienen 20.09.2026)  
+**Ziel-URL:** `https://www.grube.de/karriere/ausbildung/`
+
+**onclick-Code für Prenly:**
+```javascript
+var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.grube.de/karriere/ausbildung/']);
+```
+
+Als `<a href>`:
+```html
+<a href="https://www.grube.de/karriere/ausbildung/"
+   target="_blank"
+   onclick="var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.grube.de/karriere/ausbildung/']);">
+</a>
+```
+
+> **Wichtig – exakte URL:** Grube wird im System mit **striktem Exakt-Abgleich** (`==`)
+> gemessen, nicht nur Domain-Matching. Der onclick-Code muss die URL **exakt so** enthalten:
+> `https://www.grube.de/karriere/ausbildung/` – mit `www.`, mit `https://` und mit
+> abschließendem `/`. Jede Abweichung führt zu 0 gemessenen Klicks.
