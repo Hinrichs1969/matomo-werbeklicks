@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-18T10:53:06",
+  "generated_at": "2026-10-19T12:55:28",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 5810.41,
-  "progress_pct": 14.5,
-  "remaining": 34189.59,
-  "deal_count": 81,
+  "total_db": 5868.41,
+  "progress_pct": 14.7,
+  "remaining": 34131.59,
+  "deal_count": 83,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -14,9 +14,9 @@
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 64,
-      "db": 4787.9,
-      "value": 5363.0,
+      "n": 66,
+      "db": 4845.9,
+      "value": 5421.0,
       "missing_db": 1
     },
     "online_anzeigen": {
@@ -127,20 +127,27 @@
       "sonstige_rest": 315.0,
       "online_anzeigen": 0.0,
       "total": 315.0
+    },
+    {
+      "week": "W43",
+      "vermittlungen": 0.0,
+      "sonstige_rest": 58.0,
+      "online_anzeigen": 0.0,
+      "total": 58.0
     }
   ],
   "process": {
     "activities_total": 650,
-    "deals_created_total": 421,
+    "deals_created_total": 423,
     "deals_by_status": {
       "open": 165,
-      "won": 84,
+      "won": 86,
       "lost": 172
     },
     "conversion": {
-      "to_deal_pct": 64.8,
-      "to_won_pct": 12.9,
-      "win_rate_pct": 32.8,
+      "to_deal_pct": 65.1,
+      "to_won_pct": 13.2,
+      "win_rate_pct": 33.3,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -199,6 +206,10 @@
       {
         "week": "W42",
         "count": 66
+      },
+      {
+        "week": "W43",
+        "count": 0
       }
     ],
     "weekly_deals": [
@@ -299,6 +310,13 @@
         "won": 3,
         "lost": 2,
         "total": 34
+      },
+      {
+        "week": "W43",
+        "open": 0,
+        "won": 2,
+        "lost": 0,
+        "total": 2
       }
     ],
     "weekly_conversion": [
@@ -413,6 +431,14 @@
         "won": 3,
         "to_deal_pct": 51.5,
         "to_won_pct": 4.5
+      },
+      {
+        "week": "W43",
+        "activities": 0,
+        "deals_created": 2,
+        "won": 2,
+        "to_deal_pct": null,
+        "to_won_pct": null
       }
     ]
   },
