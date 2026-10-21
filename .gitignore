@@ -2,6 +2,9 @@
 *.log
 matomo-update.log
 
+# Lokale Secrets (nie committen)
+.env.local
+
 # Canvas (nur lokal relevant)
 *.canvas.tsx
 
