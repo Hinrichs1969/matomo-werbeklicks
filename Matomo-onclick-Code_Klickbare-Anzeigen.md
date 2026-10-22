@@ -18,19 +18,21 @@ Nur die URL muss je Kunde angepasst werden. Der Rest bleibt immer gleich.
 
 ---
 
-## Kunden mit fehlendem onclick-Code (Stand Oktober 2026)
+## Kahnwald – kein onclick-Code nötig (Hausdienst-Link)
 
-### Kahnwald Optik-Hörgeräte
+**Erkenntnis Oktober 2026:** Kahnwald nutzt einen **Hausdienst-Kurzlink** als Ziel-URL im
+Prenly-Klickbereich. Prenly setzt `dimension14` automatisch auf diese Link-URL.
+→ **Kein onclick-Code nötig.** Tracking funktioniert bereits.
 
-**Anzeige:** Senioren heute (HK, erschienen 11.10.2026)
+Der Matomo-Filter lautet: `dimension14 contains optik-kahnwald`  
+(greift auf den `utm_campaign=optik-kahnwald`-Parameter im Hausdienst-Link).
 
-```javascript
-var _paq=window._paq||[];_paq.push(['setCustomDimension',14,'https://www.optikkahnwald.de']);
-```
-
-> Bitte genaue Ziel-URL der Anzeige mit Verkauf klären – mit oder ohne Unterseite.
+Aktiver Link in Prenly: `https://hausdienst.../s/CAUPQFN?utm_campaign=optik-kahnwald`  
+Messung seit Einrichtung: ✅ 331 Besuche / 400 Einblendungen / 31 Klicks (Stand Oktober 2026)
 
 ---
+
+## Kunden mit fehlendem onclick-Code (Stand Oktober 2026)
 
 ### MSM Walsrode GmbH & Co. KG
 
