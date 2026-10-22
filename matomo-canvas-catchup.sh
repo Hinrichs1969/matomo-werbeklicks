@@ -31,5 +31,8 @@ if grep -q "\[$TODAY.*=== Update erfolgreich abgeschlossen ===" "$LOG" 2>/dev/nu
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] Update heute bereits erfolgreich gelaufen – kein Nachholen noetig." >> "$LOG"
 else
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] Kein erfolgreicher Lauf heute – hole Update nach." >> "$LOG"
+  # Zuerst Neukunden erkennen
+  /usr/bin/python3 "/Users/khinrichs/KI-Projekt/OKR 7:26/entdecke_neukunden.py" >> "$LOG" 2>&1
+  # Dann Report aktualisieren
   /usr/bin/python3 "$SCRIPT" 2>&1 | tee -a "$LOG"
 fi

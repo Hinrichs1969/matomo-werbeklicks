@@ -21,6 +21,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Neukunden automatisch erkennen
+        env:
+          MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
+          PIPEDRIVE_API_TOKEN: ${{ secrets.PIPEDRIVE_API_TOKEN }}
+        run: python entdecke_neukunden.py
+
+      - name: neukunden.json committen (falls neue Kunden entdeckt)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add neukunden.json
+          git diff --cached --quiet || git commit -m "auto: Neukunden entdeckt $(date +'%Y-%m-%d')"
+          git push || true
+
       - name: Matomo-Skript ausführen
         env:
           MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
@@ -38,9 +53,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Werbeklicks-Report-aktuell.html berichte/
-          # Immer committen – mindestens das Datum ändert sich täglich.
-          # Kein git diff-Check mehr, damit der Report nie stillschweigend ausbleibt.
+          git add Werbeklicks-Report-aktuell.html berichte/ neukunden.json
           git commit -m "Werbeklicks-Report aktualisiert $(date +'%Y-%m-%d')" || true
           git pull --rebase origin main
           git push

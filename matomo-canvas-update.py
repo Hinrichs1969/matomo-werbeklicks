@@ -19,6 +19,17 @@ SITE_ID  = 14
 BASE_URL = "https://matomo.mundschenk.de/index.php"
 START    = "2026-07-01"
 _HERE    = os.path.dirname(os.path.abspath(__file__))
+
+# Automatisch entdeckte Neukunden aus neukunden.json laden
+def _load_neukunden():
+    path = os.path.join(_HERE, "neukunden.json")
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return []
 CANVAS   = os.environ.get(
     "CANVAS_PATH",
     "/Users/khinrichs/.cursor/projects/Users-khinrichs-KI-Projekt-OKR-7-26/canvases/matomo-werbekunden-klicks.canvas.tsx"
@@ -73,13 +84,17 @@ ADVERTISERS = [
     {"key": "heidekreis",     "pub": "BZ", "pipedrive_org_id": 2489,   "name": "Landkreis Heidekreis",           "url": "heidekreis.de",                  "seg": "dimension14%3D%40heidekreis.de",                                                                                                                                                "utm": False, "klaeren": True },
     # Neue Kunden Oktober 2026 – Wochenend-Erscheinungen
     {"key": "schlamann",     "pub": "BZ",   "pipedrive_org_id": 12756, "name": "Schlamann Autokrane GmbH",        "url": "schlamann-arbeitsbuehnen.de", "seg": "dimension14%3D%40schlamann",               "utm": False, "klaeren": False},
-    {"key": "postbank",      "pub": "both", "pipedrive_org_id": 11582, "name": "Postbank Finanzberatung AG",       "url": "postbank.de",                 "seg": "dimension14%3D%40postbank",                "utm": False, "klaeren": False},
+    {"key": "postbank",      "pub": "HK", "pipedrive_org_id":  16751, "name": "Postbank Finanzberatung AG",       "url": "postbank.de",                 "seg": "dimension14%3D%40postbank",                "utm": False, "klaeren": False},
     {"key": "mvg_mathe",     "pub": "BZ",   "pipedrive_org_id": 11432, "name": "MVG Mathé Schmierstofftechnik",    "url": "mathy.de",                    "seg": "dimension14%3D%40mvg-mathe",               "utm": False, "klaeren": False},
     # Interstitials OHNE onclick-Code → banner_click via dimension14 noch nicht messbar
     # Sobald onclick-Code im Prenly-Interstitial eingebaut ist, kommen automatisch Daten
+    {"key": "mediclin_klick",  "pub": "BZ",   "pipedrive_org_id": 3500,  "name": "MediClin Klinikum Soltau (klickbar)", "url": "klinikum-soltau.de",         "seg": "dimension14%3D%40mediclin-klinikum",        "utm": False, "klaeren": False},
     {"key": "volksbank",      "pub": "BZ", "pipedrive_org_id": 385,    "name": "Volksbank Lüneburger Heide",     "url": "vblh.de",                        "seg": "dimension14%3D%40vblh.de",                                                                                                                                                      "utm": False, "klaeren": False, "banner": True, "no_onclick": True},
     {"key": "mediclin",       "pub": "BZ", "pipedrive_org_id": 3500,   "name": "MediClin Klinikum Soltau",       "url": "klinikum-soltau.de",             "seg": "dimension14%3D%40klinikum-soltau.de",                                                                                                                                           "utm": False, "klaeren": False, "banner": True, "no_onclick": True},
 ]
+
+# Automatisch entdeckte Neukunden anhängen (neukunden.json)
+ADVERTISERS.extend(_load_neukunden())
 
 
 def log(msg):
