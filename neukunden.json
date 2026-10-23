@@ -1,27 +1,5 @@
 [
   {
-    "key": "vitamin_k4",
-    "pub": "both",
-    "pipedrive_org_id": null,
-    "name": "Vitamin K4",
-    "url": "vitamin-k4.de",
-    "seg": "dimension14%3D%40vitamin-k4",
-    "utm": false,
-    "klaeren": true,
-    "auto_discovered": true
-  },
-  {
-    "key": "zahntechniker",
-    "pub": "both",
-    "pipedrive_org_id": null,
-    "name": "Zahntechniker",
-    "url": "zahntechniker.de",
-    "seg": "dimension14%3D%40zahntechniker",
-    "utm": false,
-    "klaeren": true,
-    "auto_discovered": true
-  },
-  {
     "key": "cms_verbund",
     "pub": "both",
     "pipedrive_org_id": null,
@@ -30,17 +8,6 @@
     "seg": "dimension14%3D%40cms-verbund",
     "utm": false,
     "klaeren": true,
-    "auto_discovered": true
-  },
-  {
-    "key": "stadtwerke_munster_bispingen",
-    "pub": "both",
-    "pipedrive_org_id": 11934,
-    "name": "Stadtwerke Munster-Bispingen GmbH",
-    "url": "ihr-stadtwerk.de/stadtwerke.html",
-    "seg": "dimension14%3D%40stadtwerke-munster-bispingen",
-    "utm": false,
-    "klaeren": false,
     "auto_discovered": true
   }
 ]

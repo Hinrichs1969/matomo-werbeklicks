@@ -105,14 +105,25 @@ def load_advertisers_segs() -> set:
 
 
 def is_covered(utm: str, segs: set) -> bool:
-    """Prüft ob der utm-Wert durch irgendeinen bestehenden Filter abgedeckt ist."""
+    """Prüft ob der utm-Wert durch irgendeinen bestehenden Filter abgedeckt ist.
+
+    Erkennt drei Fälle:
+    1. contains-Filter (=@): UTM enthält den Filterwert ODER Filterwert enthält UTM
+    2. exact-Filter (==): UTM erscheint als Teilstring in der Filter-URL
+    3. OR-Filter (z.B. 'seg1,seg2'): UTM irgendwo im Gesamtstring
+    """
     for seg in segs:
-        if "=@" in seg:          # contains
-            fval = seg.split("=@")[1]
-            if fval in utm:
+        # OR-Filter: kommasepariert (z.B. Lorenz Dental mit zahntechniker)
+        if utm in seg:
+            return True
+        if "=@" in seg:
+            fval = seg.split("=@")[1].split(",")[0]  # ersten Teil nehmen
+            if fval in utm or utm in fval:
                 return True
-        elif "==" in seg:         # exact – Hausdienst-URL würde nicht exakt matchen
-            pass
+        elif "==" in seg:
+            full_url = seg.split("==")[1]
+            if utm in full_url:  # z.B. 'vitamin-k4' in 'http://www.vitamin-k4.de'
+                return True
     return False
 
 
