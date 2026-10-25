@@ -1,13 +1,35 @@
 [
-  {
-    "key": "cms_verbund",
-    "pub": "both",
-    "pipedrive_org_id": null,
-    "name": "Cms Verbund",
-    "url": "cms-verbund.de",
-    "seg": "dimension14%3D%40cms-verbund",
-    "utm": false,
-    "klaeren": true,
-    "auto_discovered": true
-  }
+    {
+        "key": "cms_verbund",
+        "pub": "both",
+        "pipedrive_org_id": null,
+        "name": "Cms Verbund",
+        "url": "cms-verbund.de",
+        "seg": "dimension14%3D%40cms-verbund",
+        "utm": false,
+        "klaeren": true,
+        "auto_discovered": true
+    },
+    {
+        "key": "hotel_stadt_munster",
+        "pub": "both",
+        "pipedrive_org_id": 10963,
+        "name": "Hotel Stadt Munster",
+        "url": "hotel-stadt-munster.de",
+        "seg": "dimension14%3D%40stadt-munster",
+        "utm": false,
+        "klaeren": false,
+        "auto_discovered": true
+    },
+    {
+        "key": "mediclin_karriere",
+        "pub": "both",
+        "pipedrive_org_id": null,
+        "name": "Mediclin Karriere",
+        "url": "mediclin-karriere.de",
+        "seg": "dimension14%3D%40mediclin-karriere",
+        "utm": false,
+        "klaeren": true,
+        "auto_discovered": true
+    }
 ]

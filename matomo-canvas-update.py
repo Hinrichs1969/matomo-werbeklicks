@@ -85,7 +85,7 @@ ADVERTISERS = [
     # Neue Kunden Oktober 2026 – Wochenend-Erscheinungen
     {"key": "schlamann",     "pub": "BZ",   "pipedrive_org_id": 12756, "name": "Schlamann Autokrane GmbH",        "url": "schlamann-arbeitsbuehnen.de", "seg": "dimension14%3D%40schlamann",               "utm": False, "klaeren": False},
     {"key": "postbank",      "pub": "HK", "pipedrive_org_id":  16751, "name": "Postbank Finanzberatung AG",       "url": "postbank.de",                 "seg": "dimension14%3D%40postbank",                "utm": False, "klaeren": False},
-    {"key": "mvg_mathe",     "pub": "BZ",   "pipedrive_org_id": 11432, "name": "MVG Mathé Schmierstofftechnik",    "url": "mathy.de",                    "seg": "dimension14%3D%40mvg-mathe",               "utm": False, "klaeren": False},
+    {"key": "mvg_mathe",     "pub": "BZ",   "pipedrive_org_id": 11432, "name": "MVG Mathé Schmierstofftechnik",    "url": "mathy.de",                    "seg": "dimension14%3D%40mathy",                   "utm": False, "klaeren": False},
     # Interstitials OHNE onclick-Code → banner_click via dimension14 noch nicht messbar
     # Sobald onclick-Code im Prenly-Interstitial eingebaut ist, kommen automatisch Daten
     {"key": "mediclin_klick",  "pub": "BZ",   "pipedrive_org_id": 3500,  "name": "MediClin Klinikum Soltau (klickbar)", "url": "klinikum-soltau.de",         "seg": "dimension14%3D%40mediclin-klinikum",        "utm": False, "klaeren": False},
