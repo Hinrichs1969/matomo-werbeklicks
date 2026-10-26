@@ -1259,11 +1259,16 @@ def main():
                 date_from = deal["datum"]   # Erscheinungsdatum
                 if i + 1 < len(deals):
                     next_dt = datetime.datetime.strptime(deals[i+1]["datum"], "%Y-%m-%d")
-                    date_to = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+                    next_date = next_dt.strftime("%Y-%m-%d")
+                    if next_date <= date_from:
+                        # Gleicher oder früherer Erscheinungstag → Eintageszeitraum
+                        date_to = date_from
+                    else:
+                        date_to = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
                 else:
                     date_to = TODAY
-                if date_from > TODAY or date_from > date_to:
-                    continue  # überlappende oder zukünftige Erscheinungen überspringen
+                if date_from > TODAY:
+                    continue  # Zukünftige Erscheinungen überspringen
                 ranges.append({
                     "title":        deal["title"],
                     "datum":        deal["datum"],

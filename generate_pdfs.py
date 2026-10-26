@@ -463,6 +463,46 @@ def main():
             True,
             True,
         ),
+        (
+            ROOT / "Einseiter_Handel_Erfolg_HK.md",
+            ROOT / "Einseiter_Handel_Erfolg_HK.pdf",
+            "Handel-Erfolg · Heide-Kurier",
+            "1-Pager Außendienst · Leitprodukte Kompakt & Plus Monat",
+            False,
+            False,
+        ),
+        (
+            ROOT / "Einseiter_Handel_Erfolg_BZ.md",
+            ROOT / "Einseiter_Handel_Erfolg_BZ.pdf",
+            "Handel-Erfolg · Böhme-Zeitung",
+            "1-Pager Außendienst · Leitprodukte Kompakt & Plus Monat",
+            False,
+            False,
+        ),
+        (
+            ROOT / "Handel_Erfolg_Pakete.md",
+            ROOT / "Handel_Erfolg_Pakete.pdf",
+            "Handel-Erfolg-Pakete",
+            "Standardisierte Pakete HK & BZ · KR live",
+            True,
+            False,
+        ),
+        (
+            ROOT / "Handel_Erfolg_Pipedrive_Produkte.md",
+            ROOT / "Handel_Erfolg_Pipedrive_Produkte.pdf",
+            "Pipedrive-Produkte · Handel-Erfolg",
+            "Angebotstexte zum Anlegen · Leit- und Upsell-Produkte",
+            True,
+            False,
+        ),
+        (
+            ROOT / "Einseiter_Handel_Erfolg_Kombi.md",
+            ROOT / "Einseiter_Handel_Erfolg_Kombi.pdf",
+            "Handel-Erfolg · Kombi BZ + HK",
+            "1-Pager Außendienst · Start Kombi & Plus Dauer Kombi",
+            False,
+            False,
+        ),
     ]
 
     for md, pdf, title, subtitle, cover, skip_intro in docs:
