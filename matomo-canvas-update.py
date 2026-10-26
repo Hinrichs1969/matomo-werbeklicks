@@ -1256,15 +1256,18 @@ def main():
             deals = pipedrive_deals.get(org_id, []) if org_id else []
             ranges = []
             for i, deal in enumerate(deals):
-                date_from = deal["datum"]   # Erscheinungsdatum
+                datum_dt  = datetime.datetime.strptime(deal["datum"], "%Y-%m-%d")
+                # Vorabend-Korrektur: E-Paper erscheint abends vor dem Erscheinungsdatum
+                date_from = (datum_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
                 if i + 1 < len(deals):
-                    next_dt = datetime.datetime.strptime(deals[i+1]["datum"], "%Y-%m-%d")
-                    next_date = next_dt.strftime("%Y-%m-%d")
-                    if next_date <= date_from:
+                    next_dt   = datetime.datetime.strptime(deals[i+1]["datum"], "%Y-%m-%d")
+                    # Vorabend des nächsten Deals als Grenze (= Vortag des Erscheinungsdatums)
+                    next_eve  = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+                    if next_eve <= date_from:
                         # Gleicher oder früherer Erscheinungstag → Eintageszeitraum
                         date_to = date_from
                     else:
-                        date_to = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+                        date_to = (next_dt - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
                 else:
                     date_to = TODAY
                 if date_from > TODAY:
@@ -1272,7 +1275,7 @@ def main():
                 ranges.append({
                     "title":        deal["title"],
                     "datum":        deal["datum"],
-                    "datum_de":     datetime.datetime.strptime(deal["datum"], "%Y-%m-%d").strftime("%d.%m.%Y"),
+                    "datum_de":     datum_dt.strftime("%d.%m.%Y"),
                     "value":        deal["value"],
                     "ausgabe":      deal.get("ausgabe"),   # "BZ"/"HK"/None aus Pipedrive
                     "date_from":    date_from,
