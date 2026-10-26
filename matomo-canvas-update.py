@@ -1255,33 +1255,48 @@ def main():
             org_id = a.get("pipedrive_org_id")
             deals = pipedrive_deals.get(org_id, []) if org_id else []
             ranges = []
+            # Gruppenweise Zeiträume berechnen:
+            # Deals mit gleichem Erscheinungsdatum teilen URL + Tracking →
+            # sie bekommen identische Zeiträume und zeigen dieselben Zahlen.
+            # Vorabend-Korrektur: E-Paper erscheint abends vor dem Erscheinungsdatum.
+            group_ranges = {}  # datum_str → (date_from, date_to)
             for i, deal in enumerate(deals):
-                datum_dt  = datetime.datetime.strptime(deal["datum"], "%Y-%m-%d")
-                # Vorabend-Korrektur: E-Paper erscheint abends vor dem Erscheinungsdatum
+                datum     = deal["datum"]
+                datum_dt  = datetime.datetime.strptime(datum, "%Y-%m-%d")
                 date_from = (datum_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-                if i + 1 < len(deals):
-                    next_dt   = datetime.datetime.strptime(deals[i+1]["datum"], "%Y-%m-%d")
-                    # Vorabend des nächsten Deals als Grenze (= Vortag des Erscheinungsdatums)
-                    next_eve  = (next_dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-                    if next_eve <= date_from:
-                        # Gleicher oder früherer Erscheinungstag → Eintageszeitraum
-                        date_to = date_from
+                if datum not in group_ranges:
+                    # Zeitraum-Ende bestimmen: nächstes ANDERES Erscheinungsdatum
+                    next_diff_datum = None
+                    for j in range(i + 1, len(deals)):
+                        if deals[j]["datum"] != datum:
+                            next_diff_datum = deals[j]["datum"]
+                            break
+                    if next_diff_datum:
+                        next_dt  = datetime.datetime.strptime(next_diff_datum, "%Y-%m-%d")
+                        date_to  = (next_dt - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
+                        if date_to < date_from:
+                            date_to = date_from
                     else:
-                        date_to = (next_dt - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
-                else:
-                    date_to = TODAY
-                if date_from > TODAY:
-                    continue  # Zukünftige Erscheinungen überspringen
+                        date_to = TODAY
+                    if date_from <= TODAY:
+                        group_ranges[datum] = (date_from, min(date_to, TODAY))
+
+            for deal in deals:
+                datum    = deal["datum"]
+                datum_dt = datetime.datetime.strptime(datum, "%Y-%m-%d")
+                if datum not in group_ranges:
+                    continue  # zukünftiges Erscheinungsdatum überspringen
+                date_from, date_to = group_ranges[datum]
                 ranges.append({
                     "title":        deal["title"],
-                    "datum":        deal["datum"],
+                    "datum":        datum,
                     "datum_de":     datum_dt.strftime("%d.%m.%Y"),
                     "value":        deal["value"],
-                    "ausgabe":      deal.get("ausgabe"),   # "BZ"/"HK"/None aus Pipedrive
+                    "ausgabe":      deal.get("ausgabe"),
                     "date_from":    date_from,
-                    "date_to":      min(date_to, TODAY),
+                    "date_to":      date_to,
                     "date_from_de": datetime.datetime.strptime(date_from, "%Y-%m-%d").strftime("%d.%m."),
-                    "date_to_de":   datetime.datetime.strptime(min(date_to, TODAY), "%Y-%m-%d").strftime("%d.%m.%Y"),
+                    "date_to_de":   datetime.datetime.strptime(date_to, "%Y-%m-%d").strftime("%d.%m.%Y"),
                 })
             adv_deal_ranges[a["key"]] = ranges
 
