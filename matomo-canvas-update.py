@@ -539,7 +539,9 @@ Stand: {TODAY_DE} &middot; Zeitraum: 01.07.2026&ndash;{TODAY_DE} &middot; Automa
     <p style="font-size:11px;color:#555;line-height:1.5">
       Klicks = replica_box_link_click-Events, gefiltert per destination_url-Segment.
       viavox.io: contains-Filter (alle URL-Varianten). Banner: banner_click-Event.
-      R&auml;tsel-Fabrik-Links herausgefiltert. CTR = Klicks &divide; Einblendungen.
+      R&auml;tsel-Fabrik-Links herausgefiltert.
+      Reichweite = publication_open-Events (E-Paper-&Ouml;ffnungen) im Messzeitraum, ohne Kundensegment.
+      CTR = Klicks &divide; Reichweite (einheitlich f&uuml;r klickbare Anzeigen und Banner).
     </p>
   </div>
 </div>
@@ -867,13 +869,10 @@ def generate_customer_html(adv, clicks):
     today_d    = datetime.date.today()
     total_days = (today_d - campaign_start_d).days + 1
 
-    # CTR (Klickrate): bei Klickbar-Kunden = klickbar/views, bei Banner = banner/pub_open
-    if has_banner_product:
-        ctr_val = (banner / pub_open * 100) if pub_open else None
-        ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
-    else:
-        ctr_val = (klickbar / views * 100) if views else None
-        ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+    # CTR (Klickrate): Klicks ÷ Reichweite (publication_open) – einheitlich für alle Kunden
+    active_clicks = banner if has_banner_product else klickbar
+    ctr_val = (active_clicks / pub_open * 100) if pub_open else None
+    ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
 
     # Ø Klicks pro Tag (ab Kampagnenstart des Kunden, nicht starr 01.07.)
     avg_day = fmt_dec(total / total_days) if total_days else "–"
@@ -948,11 +947,9 @@ def generate_customer_html(adv, clicks):
             date_to_d   = datetime.datetime.strptime(dr["date_to"],   "%Y-%m-%d")
             days = (date_to_d - date_from_d).days + 1
             ctr_day  = fmt_dec(dt / days) if days > 0 else "–"
-            # CTR: Banner-Kunden = banner/pub_open, Klickbar = klickbar/views
-            if has_banner_product:
-                deal_ctr = f"{fmt_dec(db / dpub_open * 100)}&thinsp;%" if dpub_open else "–"
-            else:
-                deal_ctr = f"{fmt_dec(dk / dv * 100)}&thinsp;%" if dv else "–"
+            # CTR: Klicks ÷ Reichweite (publication_open) – einheitlich für alle Kunden
+            deal_active_clicks = db if has_banner_product else dk
+            deal_ctr = f"{fmt_dec(deal_active_clicks / dpub_open * 100)}&thinsp;%" if dpub_open else "–"
             no_data  = (dt == 0)
 
             # Ausgabe-Badge
@@ -1011,7 +1008,7 @@ def generate_customer_html(adv, clicks):
   {no_data_note}
   <div class="deal-kpis">
     <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{fmt(dt)}</span></div>
-    <div class="deal-kpi"><span class="dkl">{"Reichweite" if has_banner_product else "Einblendungen"}</span><span class="dkv">{fmt(dpub_open) if has_banner_product else fmt(dv)}</span></div>
+    <div class="deal-kpi"><span class="dkl">Reichweite</span><span class="dkv">{fmt(dpub_open)}</span></div>
     <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">{deal_ctr}</span></div>
     <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">{ctr_day}</span></div>
   </div>
@@ -1163,14 +1160,14 @@ def generate_customer_html(adv, clicks):
     <div class="kpi-sub">seit {campaign_start_de}</div>
   </div>
   <div class="kpi">
-    <div class="kpi-label">{"Reichweite (&#214;ffnungen)" if has_banner_product else "Einblendungen"}</div>
-    <div class="kpi-value" style="color:#64748b">{fmt(pub_open) if has_banner_product else fmt(views)}</div>
-    <div class="kpi-sub">{"publication_open" if has_banner_product else "replica_box_link_view"}</div>
+    <div class="kpi-label">Reichweite (&#214;ffnungen)</div>
+    <div class="kpi-value" style="color:#64748b">{fmt(pub_open)}</div>
+    <div class="kpi-sub">publication_open</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Klickrate (CTR)</div>
     <div class="kpi-value" style="color:#0891b2">{ctr_pct}</div>
-    <div class="kpi-sub">{"Banner / &#214;ffnungen" if has_banner_product else "Klicks / Einblendungen"}</div>
+    <div class="kpi-sub">Klicks &divide; Reichweite</div>
   </div>
 {banner_kpi_block}
 </div>
@@ -1359,28 +1356,27 @@ def main():
             for dr in deal_results_raw.get(a["key"], []):
                 deal_pub = dr.get("ausgabe") or a.get("pub", "both")
                 dsplit = compute_bz_hk_split(dr.get("total", 0), deal_pub)
-                deal_pub_open = 0
-                if a.get("banner"):
-                    if a.get("no_onclick"):
-                        # Interstitial: Reichweite = nur Erscheinungstag (eine Edition)
-                        deal_pub_open = pub_opens_daily.get(dr["date_from"], 0)
-                    else:
-                        deal_pub_open = sum(
-                            cnt for ds, cnt in pub_opens_daily.items()
-                            if dr["date_from"] <= ds <= dr["date_to"]
-                        )
+                # Reichweite = publication_open im Deal-Zeitraum (für alle Kunden gleich)
+                if a.get("no_onclick"):
+                    # Interstitial: Reichweite = nur Erscheinungstag (eine Edition)
+                    deal_pub_open = pub_opens_daily.get(dr["date_from"], 0)
+                else:
+                    deal_pub_open = sum(
+                        cnt for ds, cnt in pub_opens_daily.items()
+                        if dr["date_from"] <= ds <= dr["date_to"]
+                    )
                 deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"], "pub_open": deal_pub_open})
             deals.sort(key=lambda x: x["datum"])
-            # Gesamte Reichweite für Banner-Kunden
+            # Gesamte Reichweite (publication_open) für alle Kunden
             banner_pub_open = 0
-            if a.get("banner") and deals:
+            if deals:
                 if a.get("no_onclick"):
                     # Interstitial: Summe der einzelnen Erscheinungstage
                     banner_pub_open = sum(dr.get("pub_open", 0) for dr in deals)
                 else:
                     earliest = min(dr["date_from"] for dr in deals)
                     banner_pub_open = sum(cnt for ds, cnt in pub_opens_daily.items() if ds >= earliest)
-            elif a.get("banner"):
+            else:
                 banner_pub_open = sum(pub_opens_daily.values())
             adv_clicks[a["key"]] = {
                 **raw,
