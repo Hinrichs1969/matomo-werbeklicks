@@ -59,7 +59,7 @@ ADVERTISERS = [
     {"key": "spd",            "pub": "HK", "pipedrive_org_id": 16337,   "name": "SPD Schneverdingen",           "url": "spd-heidekreis.de",              "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.spd-heidekreis.de%2Fwahlen-2026%2F%3Futm_campaign%3DSPD",                                                                                                      "utm": True,  "klaeren": False},
     {"key": "sushi",          "pub": "HK", "pipedrive_org_id": 17895,   "name": "Sushi Bar Soltau",             "url": "sushi-soltau.de",                "seg": "dimension14%3D%40sushi-soltau.de",                                                                                                                  "utm": True,  "klaeren": False},
     {"key": "grillhus",       "pub": "HK", "pipedrive_org_id": None,   "name": "Grillhus",                     "url": "grillhus.de/jobs",               "seg": "dimension14%3D%3Dhttps%3A%2F%2Fgrillhus.de%2Fjobs%2F%3Futm_campaign%3Dgrillhus",                                                                                                                  "utm": True,  "klaeren": False},
-    {"key": "maderos",        "pub": "BZ", "pipedrive_org_id": None,   "name": "Maderos",                      "url": "maderos.de",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.maderos.de%3Futm_campaign%3Dmaderos",                                                                                                                          "utm": True,  "klaeren": False},
+    {"key": "maderos",        "pub": "HK", "pipedrive_org_id": 3451,   "name": "Maderos",                      "url": "maderos.de",                     "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.maderos.de%3Futm_campaign%3Dmaderos",                                                                                                                          "utm": True,  "klaeren": False},
     {"key": "hatesohl",       "pub": "BZ", "pipedrive_org_id": 12082,   "name": "Bestattungen Hatesohl",        "url": "bestattungen-hatesohl.de",       "seg": "dimension14%3D%40bestattungen-hatesohl.de",                                                                                                                            "utm": True,  "klaeren": False},
     {"key": "nelsonpark",     "pub": "HK", "pipedrive_org_id": 15085,   "name": "Nelson Park Terrassen",         "url": "nelsonpark",                     "seg": "dimension14%3D%40nelsonpark",                                                                                                                                                                  "utm": True,  "klaeren": False},
     {"key": "workandlife",    "pub": "both", "pipedrive_org_id": None, "name": "Work & Life Heidekreis",        "url": "workandlife-heidekreis.de",      "seg": "dimension14%3D%40workandlife-heidekreis.de",                                                                                                                                                    "utm": True,  "klaeren": False},
@@ -1387,7 +1387,7 @@ def main():
                 else:
                     banner_pub_open = sum(dr.get("pub_open", 0) for dr in deals)
             else:
-                banner_pub_open = sum(pub_opens_daily.values())
+                banner_pub_open = 0  # Keine Deals → keine sinnvolle Reichweite
             adv_clicks[a["key"]] = {
                 **raw,
                 "bz":       split["bz"],
