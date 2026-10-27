@@ -48,7 +48,7 @@ ADVERTISERS = [
     {"key": "vitamin_k4",     "pub": "BZ", "pipedrive_org_id": None,   "name": "vitamin-k4.de",                "url": "vitamin-k4.de",                  "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.vitamin-k4.de",                                                                                                                                                  "utm": False, "klaeren": False},
     {"key": "smurfitkappa",   "pub": "BZ", "pipedrive_org_id": 11882,   "name": "smurfitkappa",                 "url": "smurfitkappa.concludis.de",      "seg": "dimension14%3D%3Dhttps%3A%2F%2Fsmurfitkappa.concludis.de%2Fprj%2Fshw%2F643fb86c8172fb56d8898497eb682c27_0%2F13796%2F%3Futm_campaign%3Dsmurfitkappa",                                                "utm": True,  "klaeren": False},
     {"key": "harbort",        "pub": "BZ", "pipedrive_org_id": 10746,   "name": "Harbort GmbH & Co. KG",        "url": "harbort.de/karriere",            "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.harbort.de%2Fkarriere%3Futm_campaign%3Dharbort",                                                                                                                "utm": True,  "klaeren": False},
-    {"key": "hotel_park",     "pub": "BZ", "pipedrive_org_id": None,   "name": "hotel-park-soltau",            "url": "hotel-park-soltau.de",           "seg": "dimension14%3D%3Dhttps%3A%2F%2Fhotel-park-soltau.de%2Faktuellestellenangebote%2F%3Futm_campaign%3Dhotel-park-soltau",                                                                               "utm": True,  "klaeren": False},
+    {"key": "hotel_park",     "pub": "HK", "pipedrive_org_id": 55,     "name": "hotel-park-soltau",            "url": "hotel-park-soltau.de",           "seg": "dimension14%3D%3Dhttps%3A%2F%2Fhotel-park-soltau.de%2Faktuellestellenangebote%2F%3Futm_campaign%3Dhotel-park-soltau",                                                                               "utm": True,  "klaeren": False},
     {"key": "stadt_munster",  "pub": "both", "pipedrive_org_id": 13901, "name": "stadt_munster",                "url": "bewerbung.munster.de",           "seg": "dimension14%3D%40bewerbung.munster.de",                                                                                                                                                            "utm": True,  "klaeren": False},
     {"key": "stadt_walsrode", "pub": "BZ", "pipedrive_org_id": 11644,   "name": "stadt-walsrode",               "url": "stadt-walsrode.de/Jobs",         "seg": "dimension14%3D%3Dhttps%3A%2F%2Fwww.stadt-walsrode.de%2FStadt-Rathaus%2FPolitik-Verwaltung%2FJobs-Die-Stadt-als-Arbeitgeber%2F%3Futm_campaign%3Dstadt-walsrode",                                      "utm": True,  "klaeren": False},
     {"key": "buergerliste",   "pub": "HK", "pipedrive_org_id": 18942,   "name": "bispinger-buergerliste",       "url": "bispinger-buergerliste.de",      "seg": "dimension14%3D%3Dhttp%3A%2F%2Fwww.bispinger-buergerliste.de%3Futm_campaign%3Dbuergerliste",                                                                                                        "utm": True,  "klaeren": False},
@@ -274,6 +274,44 @@ def fetch_pipedrive_deals():
     for oid in by_org:
         by_org[oid].sort(key=lambda x: x["datum"])
     return by_org
+
+
+def fetch_org_deals_direct(org_id):
+    """Fallback: Lädt gewonnene Deals direkt per Org-ID (wenn nicht im Hauptfilter 38534).
+    Nutzt dieselbe Parsing-Logik wie fetch_pipedrive_deals."""
+    AUSGABE_KEY_L      = "4a247ee0f4ed56f270ef471614b9121d2236f2ec"
+    ERSCHEINUNGS_KEY_L = "af960303282af79a7275b11c466837d11008cac6"
+    SKIP_AUSGABEN_L    = {"2462", "852"}
+    AUSGABE_MAP_L      = {"470": "BZ", "2507": "BZ", "2463": "HK"}
+    url = (f"https://api.pipedrive.com/v1/organizations/{org_id}/deals"
+           f"?status=won&limit=100&api_token={PIPEDRIVE_TOKEN}")
+    try:
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read())
+    except Exception as e:
+        log(f"  Pipedrive org-fetch Fehler (org {org_id}): {e}")
+        return []
+    result = []
+    for d in (data.get("data") or []):
+        if str(d.get(AUSGABE_KEY_L) or "") in SKIP_AUSGABEN_L:
+            continue
+        datum = str(d.get(ERSCHEINUNGS_KEY_L) or "")[:10]
+        if not datum:
+            datum = (d.get("won_time") or "")[:10]
+        if not datum or datum < START:
+            continue
+        ausgabe_id = str(d.get(AUSGABE_KEY_L) or "")
+        ausgabe = AUSGABE_MAP_L.get(ausgabe_id)
+        result.append({
+            "title":   d.get("title", ""),
+            "datum":   datum,
+            "value":   float(d.get("value") or 0),
+            "id":      d.get("id"),
+            "ausgabe": ausgabe,
+        })
+    result.sort(key=lambda x: x["datum"])
+    return result
 
 
 def fetch_deal_clicks(seg, date_from, date_to, has_banner):
@@ -1250,6 +1288,15 @@ def main():
         log("Hole Pipedrive-Deals (für per-Anzeigen-Auswertung)...")
         pipedrive_deals = fetch_pipedrive_deals()
         log(f"  {sum(len(v) for v in pipedrive_deals.values())} E-Paper-Deals in {len(pipedrive_deals)} Orgs")
+
+        # Fallback: Direkt per Org-ID für Advertiser, die nicht im Hauptfilter sind
+        for a in ADVERTISERS:
+            oid = a.get("pipedrive_org_id")
+            if oid and oid not in pipedrive_deals:
+                direct = fetch_org_deals_direct(oid)
+                if direct:
+                    pipedrive_deals[oid] = direct
+                    log(f"  Fallback org-fetch {a['key']} (org {oid}): {len(direct)} Deals")
 
         # Datumsbereiche je Deal berechnen
         adv_deal_ranges = {}
