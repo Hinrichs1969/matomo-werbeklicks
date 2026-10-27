@@ -1356,26 +1356,31 @@ def main():
             for dr in deal_results_raw.get(a["key"], []):
                 deal_pub = dr.get("ausgabe") or a.get("pub", "both")
                 dsplit = compute_bz_hk_split(dr.get("total", 0), deal_pub)
-                # Reichweite = publication_open im Deal-Zeitraum (für alle Kunden gleich)
-                if a.get("no_onclick"):
-                    # Interstitial: Reichweite = nur Erscheinungstag (eine Edition)
-                    deal_pub_open = pub_opens_daily.get(dr["date_from"], 0)
-                else:
+                # Reichweite (publication_open) je nach Anzeigentyp:
+                if a.get("banner") and not a.get("no_onclick"):
+                    # Banner läuft kontinuierlich im gesamten Deal-Zeitraum
                     deal_pub_open = sum(
                         cnt for ds, cnt in pub_opens_daily.items()
                         if dr["date_from"] <= ds <= dr["date_to"]
                     )
+                else:
+                    # Klickbare Anzeige / Interstitial: erscheint in EINER Ausgabe.
+                    # Reichweite = Vorabend + Erscheinungsdatum (die ~2 Tage, an denen
+                    # nahezu alle Leser diese spezifische Ausgabe öffnen).
+                    deal_pub_open = (pub_opens_daily.get(dr["date_from"], 0)   # Vorabend
+                                   + pub_opens_daily.get(dr["datum"],    0))   # Erscheinungsdatum
                 deals.append({**dr, "bz": dsplit["bz"], "hk": dsplit["hk"], "pub_open": deal_pub_open})
             deals.sort(key=lambda x: x["datum"])
-            # Gesamte Reichweite (publication_open) für alle Kunden
+            # Gesamt-Reichweite:
+            # - Banner (kontinuierlich): alle pub_opens seit erstem Deal
+            # - Klickbar / Interstitial: Summe der Einzel-Ausgaben-Reichweiten
             banner_pub_open = 0
             if deals:
-                if a.get("no_onclick"):
-                    # Interstitial: Summe der einzelnen Erscheinungstage
-                    banner_pub_open = sum(dr.get("pub_open", 0) for dr in deals)
-                else:
+                if a.get("banner") and not a.get("no_onclick"):
                     earliest = min(dr["date_from"] for dr in deals)
                     banner_pub_open = sum(cnt for ds, cnt in pub_opens_daily.items() if ds >= earliest)
+                else:
+                    banner_pub_open = sum(dr.get("pub_open", 0) for dr in deals)
             else:
                 banner_pub_open = sum(pub_opens_daily.values())
             adv_clicks[a["key"]] = {
