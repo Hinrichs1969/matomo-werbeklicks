@@ -1298,6 +1298,26 @@ def main():
                     pipedrive_deals[oid] = direct
                     log(f"  Fallback org-fetch {a['key']} (org {oid}): {len(direct)} Deals")
 
+        # Ausgabe-Lookup: Klickbare-Anzeige-Deals haben oft kein Ausgabe-Feld.
+        # Begleit-Deal mit gleichem Erscheinungsdatum in derselben Org hat die korrekte Ausgabe.
+        for a in ADVERTISERS:
+            oid = a.get("pipedrive_org_id")
+            if not oid or oid not in pipedrive_deals:
+                continue
+            missing = [d for d in pipedrive_deals[oid] if not d.get("ausgabe")]
+            if not missing:
+                continue
+            # Alle Org-Deals holen um Datum→Ausgabe-Mapping aufzubauen
+            all_org = fetch_org_deals_direct(oid)
+            date_ausgabe = {d["datum"]: d["ausgabe"] for d in all_org if d.get("ausgabe")}
+            filled = 0
+            for d in pipedrive_deals[oid]:
+                if not d.get("ausgabe") and d["datum"] in date_ausgabe:
+                    d["ausgabe"] = date_ausgabe[d["datum"]]
+                    filled += 1
+            if filled:
+                log(f"  Ausgabe aus Begleit-Deal gefüllt: {a['key']} ({filled} Deals)")
+
         # Datumsbereiche je Deal berechnen
         adv_deal_ranges = {}
         for a in ADVERTISERS:
