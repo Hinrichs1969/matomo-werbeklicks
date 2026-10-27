@@ -745,6 +745,9 @@ def generate_customer_html(adv, clicks):
     banner   = clicks.get("banner", 0)
     views    = clicks.get("views", 0)
     has_banner_product = adv.get("banner", False)
+    # Reichweite nur für reine BZ-Kunden sinnvoll (HK E-Paper hat keine messbare
+    # Prenly-Reichweite; publication_open misst primär BZ-Abonnenten)
+    show_reichweite = (adv.get("pub", "both") == "BZ")
 
     # Hinweisseite für Banner-Kunden ohne onclick-Code (keine Klicks messbar)
     if adv.get("no_onclick") and total == 0:
@@ -869,10 +872,14 @@ def generate_customer_html(adv, clicks):
     today_d    = datetime.date.today()
     total_days = (today_d - campaign_start_d).days + 1
 
-    # CTR (Klickrate): Klicks ÷ Reichweite (publication_open) – einheitlich für alle Kunden
+    # CTR (Klickrate): Klicks ÷ Reichweite – nur für BZ-Kunden (pub_open = BZ-basiert)
     active_clicks = banner if has_banner_product else klickbar
-    ctr_val = (active_clicks / pub_open * 100) if pub_open else None
-    ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+    if show_reichweite:
+        ctr_val = (active_clicks / pub_open * 100) if pub_open else None
+        ctr_pct = f"{fmt_dec(ctr_val)}&thinsp;%" if ctr_val is not None else "–"
+    else:
+        ctr_val = None
+        ctr_pct = "–"
 
     # Ø Klicks pro Tag (ab Kampagnenstart des Kunden, nicht starr 01.07.)
     avg_day = fmt_dec(total / total_days) if total_days else "–"
@@ -905,8 +912,10 @@ def generate_customer_html(adv, clicks):
         pub_pct_bz = pub_pct_hk = pub_pct_mag = ""
 
     # Banner-KPI und Format-Split
+    # Spaltenanzahl KPI-Grid: +1 für Banner, -1 wenn keine Reichweite
+    _base_cols = 3 if show_reichweite else 2
     if has_banner_product:
-        kpi_grid_cols = "repeat(4,1fr)"
+        kpi_grid_cols = f"repeat({_base_cols + 1},1fr)"
         banner_kpi_block = f"""  <div class="kpi">
     <div class="kpi-label">Banner / Interstitial</div>
     <div class="kpi-value" style="color:#0891b2">{fmt(banner)}</div>
@@ -928,7 +937,7 @@ def generate_customer_html(adv, clicks):
   </div>
 </div>"""
     else:
-        kpi_grid_cols = "repeat(3,1fr)"
+        kpi_grid_cols = f"repeat({_base_cols},1fr)"
         banner_kpi_block = ""
         format_split_section = ""
     deals = clicks.get("deals", [])
@@ -1008,8 +1017,8 @@ def generate_customer_html(adv, clicks):
   {no_data_note}
   <div class="deal-kpis">
     <div class="deal-kpi"><span class="dkl">Klicks</span><span class="dkv accent">{fmt(dt)}</span></div>
-    <div class="deal-kpi"><span class="dkl">Reichweite</span><span class="dkv">{fmt(dpub_open)}</span></div>
-    <div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">{deal_ctr}</span></div>
+    {'<div class="deal-kpi"><span class="dkl">Reichweite</span><span class="dkv">' + fmt(dpub_open) + '</span></div>' if show_reichweite else ''}
+    {'<div class="deal-kpi"><span class="dkl">Klickrate (CTR)</span><span class="dkv">' + deal_ctr + '</span></div>' if show_reichweite else ''}
     <div class="deal-kpi"><span class="dkl">&#216;&thinsp;Klicks/Tag</span><span class="dkv">{ctr_day}</span></div>
   </div>
   {deal_split_html}
@@ -1159,15 +1168,11 @@ def generate_customer_html(adv, clicks):
     <div class="kpi-value">{fmt(total)}</div>
     <div class="kpi-sub">seit {campaign_start_de}</div>
   </div>
-  <div class="kpi">
-    <div class="kpi-label">Reichweite (&#214;ffnungen)</div>
-    <div class="kpi-value" style="color:#64748b">{fmt(pub_open)}</div>
-    <div class="kpi-sub">publication_open</div>
-  </div>
+  {'<div class="kpi"><div class="kpi-label">Reichweite (&#214;ffnungen)</div><div class="kpi-value" style="color:#64748b">' + fmt(pub_open) + '</div><div class="kpi-sub">publication_open (BZ)</div></div>' if show_reichweite else ''}
   <div class="kpi">
     <div class="kpi-label">Klickrate (CTR)</div>
     <div class="kpi-value" style="color:#0891b2">{ctr_pct}</div>
-    <div class="kpi-sub">Klicks &divide; Reichweite</div>
+    <div class="kpi-sub">{'Klicks &divide; Reichweite' if show_reichweite else 'nicht verf&uuml;gbar (HK)'}</div>
   </div>
 {banner_kpi_block}
 </div>
