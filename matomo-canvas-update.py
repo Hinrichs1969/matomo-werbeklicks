@@ -283,17 +283,27 @@ def fetch_org_deals_direct(org_id):
     ERSCHEINUNGS_KEY_L = "af960303282af79a7275b11c466837d11008cac6"
     SKIP_AUSGABEN_L    = {"2462", "852"}
     AUSGABE_MAP_L      = {"470": "BZ", "2507": "BZ", "2463": "HK"}
-    url = (f"https://api.pipedrive.com/v1/organizations/{org_id}/deals"
-           f"?status=won&limit=100&api_token={PIPEDRIVE_TOKEN}")
-    try:
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = json.loads(r.read())
-    except Exception as e:
-        log(f"  Pipedrive org-fetch Fehler (org {org_id}): {e}")
-        return []
+    # Paginiert abrufen – Orgs können 100+ Deals haben (z.B. Nelson Park: 138)
+    all_items = []
+    start = 0
+    while True:
+        url = (f"https://api.pipedrive.com/v1/organizations/{org_id}/deals"
+               f"?status=won&limit=100&start={start}&api_token={PIPEDRIVE_TOKEN}")
+        try:
+            req = urllib.request.Request(url, headers={"Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read())
+        except Exception as e:
+            log(f"  Pipedrive org-fetch Fehler (org {org_id}): {e}")
+            break
+        page = data.get("data") or []
+        all_items.extend(page)
+        more = data.get("additional_data", {}).get("pagination", {}).get("more_items_in_collection", False)
+        if not more or not page:
+            break
+        start += len(page)
     result = []
-    for d in (data.get("data") or []):
+    for d in all_items:
         if str(d.get(AUSGABE_KEY_L) or "") in SKIP_AUSGABEN_L:
             continue
         datum = str(d.get(ERSCHEINUNGS_KEY_L) or "")[:10]
