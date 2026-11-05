@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-04T14:17:44",
+  "generated_at": "2026-11-05T14:31:09",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 7119.97,
-  "progress_pct": 17.8,
-  "remaining": 32880.03,
-  "deal_count": 107,
+  "total_db": 7468.97,
+  "progress_pct": 18.7,
+  "remaining": 32531.03,
+  "deal_count": 109,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -14,22 +14,22 @@
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 86,
-      "db": 6097.46,
-      "value": 6732.0,
+      "n": 87,
+      "db": 6296.46,
+      "value": 6931.0,
       "missing_db": 2
     },
     "online_anzeigen": {
-      "n": 14,
-      "db": 350.0,
-      "value": 350.0,
-      "missing_db": 0
+      "n": 15,
+      "db": 500.0,
+      "value": 500.0,
+      "missing_db": 1
     }
   },
   "online_by_rubrik": {
     "Standardbanner HK online": {
-      "n": 1,
-      "db": 350.0
+      "n": 2,
+      "db": 500.0
     },
     "Rätselseite": {
       "n": 13,
@@ -145,23 +145,23 @@
     {
       "week": "W45",
       "vermittlungen": 0.0,
-      "sonstige_rest": 174.0,
-      "online_anzeigen": 0.0,
-      "total": 174.0
+      "sonstige_rest": 373.0,
+      "online_anzeigen": 150.0,
+      "total": 523.0
     }
   ],
   "process": {
     "activities_total": 726,
     "deals_created_total": 474,
     "deals_by_status": {
-      "open": 142,
-      "won": 112,
-      "lost": 220
+      "open": 140,
+      "won": 113,
+      "lost": 221
     },
     "conversion": {
       "to_deal_pct": 65.3,
-      "to_won_pct": 15.4,
-      "win_rate_pct": 33.7,
+      "to_won_pct": 15.6,
+      "win_rate_pct": 33.8,
       "definition": "to_deal = Sonstige-Deals neu ÷ CS-Ansprachen; to_won = gewonnen ÷ CS-Ansprachen; win_rate = gewonnen ÷ (gewonnen+verloren). Kein 1:1-Matching — Kalenderwochen-Näherung."
     },
     "weekly_activities": [
@@ -293,9 +293,9 @@
       },
       {
         "week": "W37",
-        "open": 7,
+        "open": 6,
         "won": 6,
-        "lost": 23,
+        "lost": 24,
         "total": 36
       },
       {
@@ -342,8 +342,8 @@
       },
       {
         "week": "W44",
-        "open": 3,
-        "won": 8,
+        "open": 2,
+        "won": 9,
         "lost": 21,
         "total": 32
       },
@@ -480,9 +480,9 @@
         "week": "W44",
         "activities": 42,
         "deals_created": 32,
-        "won": 8,
+        "won": 9,
         "to_deal_pct": 76.2,
-        "to_won_pct": 19.0
+        "to_won_pct": 21.4
       },
       {
         "week": "W45",
