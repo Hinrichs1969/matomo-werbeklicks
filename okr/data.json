@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-10T14:46:25",
+  "generated_at": "2026-11-11T14:00:56",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 7707.97,
+  "total_db": 7736.97,
   "progress_pct": 19.3,
-  "remaining": 32292.03,
-  "deal_count": 111,
+  "remaining": 32263.03,
+  "deal_count": 112,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -14,9 +14,9 @@
       "missing_db": 0
     },
     "sonstige_rest": {
-      "n": 89,
-      "db": 6535.46,
-      "value": 7170.0,
+      "n": 90,
+      "db": 6564.46,
+      "value": 7199.0,
       "missing_db": 2
     },
     "online_anzeigen": {
@@ -152,18 +152,18 @@
     {
       "week": "W46",
       "vermittlungen": 0.0,
-      "sonstige_rest": 239.0,
+      "sonstige_rest": 268.0,
       "online_anzeigen": 0.0,
-      "total": 239.0
+      "total": 268.0
     }
   ],
   "process": {
-    "activities_total": 712,
-    "deals_created_total": 473,
+    "activities_total": 714,
+    "deals_created_total": 474,
     "deals_by_status": {
-      "open": 123,
-      "won": 115,
-      "lost": 235
+      "open": 121,
+      "won": 116,
+      "lost": 237
     },
     "conversion": {
       "to_deal_pct": 66.4,
@@ -242,7 +242,7 @@
       },
       {
         "week": "W46",
-        "count": 1
+        "count": 3
       }
     ],
     "weekly_deals": [
@@ -262,9 +262,9 @@
       },
       {
         "week": "W31",
-        "open": 5,
+        "open": 4,
         "won": 3,
-        "lost": 2,
+        "lost": 3,
         "total": 10
       },
       {
@@ -346,9 +346,9 @@
       },
       {
         "week": "W43",
-        "open": 1,
+        "open": 0,
         "won": 13,
-        "lost": 0,
+        "lost": 1,
         "total": 14
       },
       {
@@ -368,9 +368,9 @@
       {
         "week": "W46",
         "open": 0,
-        "won": 2,
+        "won": 3,
         "lost": 1,
-        "total": 3
+        "total": 4
       }
     ],
     "weekly_conversion": [
@@ -512,11 +512,11 @@
       },
       {
         "week": "W46",
-        "activities": 1,
-        "deals_created": 3,
-        "won": 2,
-        "to_deal_pct": 300.0,
-        "to_won_pct": 200.0
+        "activities": 3,
+        "deals_created": 4,
+        "won": 3,
+        "to_deal_pct": 133.3,
+        "to_won_pct": 100.0
       }
     ]
   },
