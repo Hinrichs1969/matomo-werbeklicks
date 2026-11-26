@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-25T17:05:34",
+  "generated_at": "2026-11-26T16:45:43",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
   "total_db": 8460.97,
   "progress_pct": 21.2,
   "remaining": 31539.03,
-  "deal_count": 124,
+  "deal_count": 131,
   "segments": {
     "vermittlungen": {
       "n": 7,
@@ -20,7 +20,7 @@
       "missing_db": 4
     },
     "online_anzeigen": {
-      "n": 20,
+      "n": 27,
       "db": 898.0,
       "value": 898.0,
       "missing_db": 4
@@ -36,7 +36,7 @@
       "db": 398.0
     },
     "Rätselseite": {
-      "n": 15,
+      "n": 22,
       "db": 0.0
     },
     "Premiumbanner HK online": {
