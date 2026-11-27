@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-26T16:45:43",
+  "generated_at": "2026-11-27T16:31:17",
   "cycle_start": "2026-07-13",
   "goal": 40000.0,
-  "total_db": 8460.97,
-  "progress_pct": 21.2,
-  "remaining": 31539.03,
+  "total_db": 9336.97,
+  "progress_pct": 23.3,
+  "remaining": 30663.03,
   "deal_count": 131,
   "segments": {
     "vermittlungen": {
@@ -21,19 +21,19 @@
     },
     "online_anzeigen": {
       "n": 27,
-      "db": 898.0,
-      "value": 898.0,
+      "db": 1774.0,
+      "value": 1774.0,
       "missing_db": 4
     }
   },
   "online_by_rubrik": {
+    "Interstitial E-Paper": {
+      "n": 2,
+      "db": 1274.0
+    },
     "Standardbanner HK online": {
       "n": 2,
       "db": 500.0
-    },
-    "Interstitial E-Paper": {
-      "n": 2,
-      "db": 398.0
     },
     "Rätselseite": {
       "n": 22,
@@ -175,8 +175,8 @@
       "week": "W48",
       "vermittlungen": 0.0,
       "sonstige_rest": 0.0,
-      "online_anzeigen": 199.0,
-      "total": 199.0
+      "online_anzeigen": 1075.0,
+      "total": 1075.0
     }
   ],
   "process": {
